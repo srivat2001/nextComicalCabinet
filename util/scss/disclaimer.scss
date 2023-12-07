@@ -1,0 +1,19 @@
+@import "responsive";
+.disclaimer {
+  margin-left: 20px;
+  margin-right: 20px;
+  padding: 0px;
+  padding-top: 10px;
+  border-top: 1px solid white;
+  background: transparent;
+  color: black;
+  margin-top: 91px;
+  line-height: 1.5;
+  @include respond-to("small") {
+    margin: 0;
+  }
+}
+
+.disclaimer p {
+  margin-bottom: 10px;
+}

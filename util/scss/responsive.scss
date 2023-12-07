@@ -1,0 +1,17 @@
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == "exsmall" {
+    @media (max-width: 1800px) {
+      @content;
+    }
+  }
+  @if $breakpoint == "mobile" {
+    @media (min-width: 330px) and (max-width: 502px) {
+      @content;
+    }
+  }
+  @if $breakpoint == "small" {
+    @media (min-width: 330px) and (max-width: 992px) {
+      @content;
+    }
+  }
+}

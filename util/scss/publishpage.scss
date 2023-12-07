@@ -1,0 +1,120 @@
+@import "responsive";
+
+.publish-page {
+  background-color: white;
+  padding: 1rem;
+  .edit-content {
+    position: relative;
+    .access-code {
+      width: 100%;
+      height: 48px;
+      font-size: 34px;
+    }
+  }
+  .edit-img {
+    object-fit: cover;
+    width: 100%;
+  }
+  .blur-bg {
+  }
+  .not-allowed-overlay {
+    position: absolute;
+    top: 28px;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    scale: 1.1;
+    .alert {
+      position: relative;
+      left: 50%;
+      top: 200px;
+      display: grid;
+      place-items: center;
+      transform: translate(-50%, -50%);
+      background: black;
+      width: fit-content;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 42px;
+    }
+  }
+  .not-allowed-overlay::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: inherit;
+    background: black;
+    opacity: 0.8;
+    backdrop-filter: blur(60px);
+    -webkit-backdrop-filter: blur(60px);
+  }
+
+  .heading {
+    font-size: 29px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+    background-color: white;
+    color: black;
+  }
+
+  .warning {
+    color: #fff;
+    font-size: 14px;
+    color: #f00;
+    font-weight: 200;
+  }
+  .Alert {
+    text-align: right;
+    margin-bottom: 10px;
+    color: black;
+    font-weight: 300;
+    font-size: 14px;
+    transition: 1s color;
+  }
+  .red-characters {
+    color: red;
+    transition: 1s color;
+  }
+  .Character:last-child {
+    margin-bottom: 142px;
+  }
+  select.addArticle {
+    font-size: 20px;
+  }
+  .addArticle {
+    font-weight: 500;
+    line-height: 1.3;
+    background-color: transparent;
+    color: black;
+    display: block;
+    width: 100%;
+    padding-left: 0px;
+    font-size: 30px;
+    border: 0;
+    border-bottom: 1px solid black;
+    outline: 0;
+    resize: none;
+    height: 43px;
+
+    :focus {
+      outline: none;
+    }
+    @include respond-to("small") {
+      font-size: 20px;
+      font-size: 20px;
+      border: 1px solid #c7c7c7;
+    }
+  }
+  .Promt {
+    margin-top: 23px;
+    font-size: 25px;
+    width: fit-content;
+    background: black;
+    color: white;
+    border: 1px solid white;
+    padding: 0px 10px 0px 10px;
+    font-weight: 100;
+  }
+}
