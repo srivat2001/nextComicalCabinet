@@ -11,11 +11,7 @@ import React, { useEffect, useState, useReducer, useRef } from "react";
 import "../util/scss/publishpage.scss";
 function MyApp({ Component, pageProps }) {
   const isOnline = checkInternet();
-  return (
-    <StylesProvider injectFirst>
-      <Component {...pageProps} isOnline={isOnline} />
-    </StylesProvider>
-  );
+  return <Component {...pageProps} isOnline={isOnline} />;
 }
 
 export default MyApp;
