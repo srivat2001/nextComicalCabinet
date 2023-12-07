@@ -8,7 +8,6 @@ import "../util/scss/article.scss";
 // import "../util/scss/breadcumb.scss";
 import checkInternet from "../util/js/checkConnection";
 import React, { useEffect, useState, useReducer, useRef } from "react";
-import { StylesProvider } from "@mui/styles";
 import "../util/scss/publishpage.scss";
 function MyApp({ Component, pageProps }) {
   const isOnline = checkInternet();
