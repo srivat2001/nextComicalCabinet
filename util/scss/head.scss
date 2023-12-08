@@ -58,12 +58,12 @@ header {
             margin-bottom: 10px;
             position: relative;
             padding-left: 30px;
-            background: black;
+            background: #ffffff;
           }
           .upload-btn {
             padding: 10px;
             border-radius: 35px;
-            color: white;
+            color: #414141;
           }
           &:first-child {
             margin: 5px;
@@ -91,11 +91,12 @@ header {
           }
         }
       }
-      .btnproxy {
-        border-radius: 20px;
-        padding: 5px 10px;
-        position: relative;
-      }
+      // .btnproxy {
+      //   border-radius: 20px;
+      //   padding: 5px 10px;
+      //   position: relative;
+      //   border: 1px solid rgb(144, 144, 144);
+      // }
     }
     .user-logged-out-details {
       margin-left: auto;

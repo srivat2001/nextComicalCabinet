@@ -1,41 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { withRouter, useRouter } from "next/router";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import { timeAndDateConverter } from "../../util/js/converter";
 import slugify from "slugify";
 import { Heading } from "../../util/components/heading";
-import { Breadcomb } from "../../util/components/breadcomb";
 import { auth } from "../../util/js/firebaseconn";
 import {
   LoggedInInfo,
   getUserData,
   searcharticle,
 } from "../../util/js/articleDB";
-import { Helmet } from "react-helmet";
 import Disclaimer from "../../util/components/footer";
 import NoIntenet from "../../util/components/internetNotFound";
 import Head from "next/head";
-import { Fragment } from "react";
-import {
-  ref as sRef,
-  query,
-  orderByChild,
-  equalTo,
-  orderByKey,
-  onValue,
-  set,
-  startAt,
-  endAt,
-  child,
-  push,
-  get,
-  remove,
-  limitToFirst,
-  limitToLast,
-  startAfter,
-  endBefore,
-  update,
-} from "firebase/database";
+
 import { db, app } from "../../util/js/firebaseconn";
 async function search(term) {
   try {
@@ -54,6 +32,12 @@ function portfolioProject({ isOnline, articleData }) {
   const [admin, isAdmin] = useState(false);
   const [userdata, setUserData] = useState({});
   console.log(articleData);
+  if (typeof window !== "undefined") {
+    if (!articleData) {
+      router.push("404");
+    }
+  }
+
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       LoggedInInfo(user)
@@ -104,6 +88,11 @@ function portfolioProject({ isOnline, articleData }) {
       <NoIntenet isOnline={isOnline} />
       <Head>
         <title>{articleData.title}</title>
+        <script
+          src="https://kit.fontawesome.com/yourcode.js"
+          crossorigin="anonymous"
+        ></script>
+
         <meta name="description" content={articleData.desc} />
         <meta property="og:title" content={articleData.title} />
         <meta property="og:description" content={articleData.desc} />
@@ -167,11 +156,20 @@ export async function getServerSideProps(context) {
   console.log(db);
   //  const searchIndexRef = sRef(db, "searchIndex/" + projectid);
   const articleSnapshot = await searcharticle(projectid);
+  if (articleSnapshot) {
+    console.log(articleSnapshot);
+    return {
+      props: {
+        articleData: articleSnapshot,
+      },
+    };
+  } else {
+    return {
+      redirect: {
+        destination: "/404", // Adjust the path accordingly
+        permanent: false,
+      },
+    };
+  }
   //const res = await fetch("https://api.github.com/repos/vercel/next.js");
-  console.log(articleSnapshot);
-  return {
-    props: {
-      articleData: articleSnapshot,
-    },
-  };
 }

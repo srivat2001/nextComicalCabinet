@@ -1,6 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "responsive";
-
+//@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 body {
   background-color: black;
   color: black;
@@ -18,11 +17,13 @@ body {
 .warning-message {
   text-align: center;
   margin: auto;
-  background: #810000;
+  background: #020202;
   color: white;
-  padding: 1px 42px;
-  border-radius: 25px;
+  padding: 3px 42px;
   margin-top: 10px;
+  @include respond-to("small") {
+    border-radius: 10px;
+  }
 }
 button {
   background: transparent;
@@ -42,9 +43,12 @@ button {
     color: white;
   }
 }
-
+@font-face {
+  font-family: "myFirstFont";
+  src: url("../fonts/Kanit-Regular.ttf") format("truetype");
+}
 .App {
-  font-family: "Kanit", sans-serif;
+  font-family: "myFirstFont";
   position: relative;
   font-size: 600;
   margin: 2rem;
@@ -74,16 +78,25 @@ button {
     float: left;
     margin: 20px 20px 20px 0;
   }
-  .blogs-data {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px;
-    background: white;
-    justify-content: center;
-    padding-top: 20px;
-    min-height: 100vh;
-    position: relative;
+  .blog-display-container {
+    background-color: white;
+    padding-bottom: 10px;
+    min-height: 500px;
+    .sectioncontainer,
+    .blog-holder-btn-container {
+      width: fit-content;
+      margin: auto;
+      .blogs-data {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: white;
+        justify-content: left;
+        padding-top: 20px;
+        position: relative;
+      }
+    }
   }
   .loading {
     min-height: auto;
@@ -123,7 +136,7 @@ button {
   .boxloading::after {
     z-index: 1;
     height: 400px;
-    border-radius: 20px;
+
     @include respond-to("small") {
     }
   }

@@ -103,24 +103,32 @@ function PublishArticle({}) {
   };
   useEffect(() => {
     if (router.query.articleid) {
-      setType(router.query.articleid[0]);
+      switch (router.query.articleid[0]) {
+        case "add":
+          setType(router.query.articleid[0]);
+          break;
+        case "edit":
+          setType(router.query.articleid[0]);
+          break;
+        default:
+          router.push("/404");
+      }
     }
-
     fetchSection();
     auth.onAuthStateChanged(async (user) => {
       LoggedInInfo(user)
         .then((result) => {
           setuser(user);
-          console.log(result);
           if (result.isAdmin) {
             setAdmin(true);
             if (router.query.articleid && router.query.articleid[0] == "edit") {
               loadArticlesIfexists(user.uid, router.query.articleid[1]);
-            } else {
+            } else if (router.query.articleid[0] == "add") {
               setLoad(1);
             }
           } else {
             setAdmin(false);
+            setLoad(1);
           }
         })
         .catch((error) => {
@@ -137,16 +145,12 @@ function PublishArticle({}) {
         <Heading loaded={load} />
         <div className="publish-page">
           {load ? (
-            <div
-              className={
-                admin == true ? "edit-content" : "edit-content blur-bg"
-              }
-            >
+            <div className={1 ? "edit-content" : "edit-content blur-bg"}>
               <div className="heading">
                 {type === "edit" ? "Edit" : "Add"} Article
               </div>
               {load ? (
-                found ? (
+                (found || type == "add") && admin == true ? (
                   <div>
                     <label className="textarea-label">Enter Your Title</label>
                     <textarea
@@ -212,6 +216,7 @@ function PublishArticle({}) {
 
                     <div className="warning">{warning.join(", ")}</div>
                     <button
+                      disabled={!admin}
                       onClick={async (e) => {
                         SetWarning(
                           await Publisharticle1(
@@ -229,17 +234,14 @@ function PublishArticle({}) {
                       Publish
                     </button>
                   </div>
-                ) : (
-                  <div>No Article Found</div>
-                )
+                ) : type == "add" && admin == false ? (
+                  <div>You are not admin</div>
+                ) : type == "edit" && admin == true && !found ? (
+                  <div>Not found, and the user is not an admin</div>
+                ) : null
               ) : (
                 <div>loading</div>
               )}
-              {!admin ? (
-                <div className="not-allowed-overlay">
-                  <div className="alert">You Dont Have Access!</div>
-                </div>
-              ) : null}
             </div>
           ) : null}
         </div>

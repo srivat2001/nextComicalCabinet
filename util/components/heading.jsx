@@ -13,6 +13,10 @@ import { fetchArticleSections } from "../js/articleDB";
 import { app } from "../js/firebaseconn";
 import img_logo from "../img/TCB_Banner2.png";
 import Image from "next/image";
+// YourComponent.js
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+
 export const Heading = ({ loaded }) => {
   const initialState = {
     alist: [],
@@ -145,14 +149,14 @@ export const Heading = ({ loaded }) => {
               </div>
               <div className="btn-holder">
                 <a onClick={signOutbtn}>
-                  <div className="btnproxy">
-                    <i class="fa fa-sign-out"></i>
-                    <span>Sign out</span>
-                  </div>
-                </a>
-                <Link href="/article/add-article">
                   <button className="upload-btn ">
-                    <i class="fa fa-upload"></i>
+                    <FontAwesomeIcon icon={faSignOutAlt} />
+                    <span>Sign out</span>
+                  </button>
+                </a>
+                <Link href="/article/add">
+                  <button className="upload-btn ">
+                    <FontAwesomeIcon icon={faUpload} />
                   </button>
                 </Link>
               </div>
@@ -206,7 +210,7 @@ export const Heading = ({ loaded }) => {
 
                   <Link href="/article/add-article">
                     <button className="upload-btn ">
-                      <i class="fa fa-upload"></i>
+                      <FontAwesomeIcon icon={faUpload} />
                     </button>
                   </Link>
                 </div>

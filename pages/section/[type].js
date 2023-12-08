@@ -15,7 +15,7 @@ import {
 
 import { BlogBox } from "../../util/components/blogBox";
 
-export default function Section() {
+export default function Section({ isOnline }) {
   function deleteData() {}
   const [alist, setAlist] = useState([]);
   const router = useRouter();
@@ -37,6 +37,7 @@ export default function Section() {
 
   const addmore = async () => {
     try {
+      console.log();
       const val = await getArticleByScroll(
         [],
         FirstTime,
@@ -45,6 +46,7 @@ export default function Section() {
       );
       let rvarr = val.articles;
       setNextKey(val.lowestTimestampKey.time);
+      console.log(val);
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
       setAddMore(true);
@@ -61,6 +63,10 @@ export default function Section() {
     setReload((reload) => !reload);
   };
   useEffect(() => {
+    if (!isOnline) {
+      setActionMessage("You are offline");
+      return () => {};
+    }
     if (router.query.type) {
       setType(router.query.type);
     }
@@ -89,42 +95,44 @@ export default function Section() {
     addmore();
 
     EffectRan.current = false;
-    return () => {};
-  }, [type, reload, router]);
+  }, [type, reload, router, isOnline]);
   return (
     <div>
       <div className="App section">
-        <Heading loaded={loaded} />
-
-        <div className="section-topic">{type}</div>
-        <div className="blogs-data">
-          {alist.length > 0 ? (
-            alist.map((article) => (
-              <BlogBox
-                data={article}
-                admin={admin}
-                deleteAlert={deletedAlert}
-              />
-            ))
-          ) : (
-            <div className="not-found">{actionMessage}</div>
-          )}
-        </div>
-        {addMore ? (
-          <div>
-            {" "}
-            <button
-              onClick={() => {
-                addmore();
-              }}
-            >
-              Load more
-            </button>{" "}
+        <div className="blog-display-container">
+          <Heading loaded={loaded} />
+          <div className="sectioncontainer">
+            <div className="section-topic">{type}</div>
+            <div className="blogs-data">
+              {alist.length > 0 ? (
+                alist.map((article) => (
+                  <BlogBox
+                    data={article}
+                    admin={admin}
+                    deleteAlert={deletedAlert}
+                  />
+                ))
+              ) : (
+                <div className="not-found">{actionMessage}</div>
+              )}
+            </div>
+            {addMore ? (
+              <div>
+                {" "}
+                <button
+                  onClick={() => {
+                    addmore();
+                  }}
+                >
+                  Load more
+                </button>{" "}
+              </div>
+            ) : null}
+            {!addMore && alist.length > 0 ? (
+              <div>No More Article to load</div>
+            ) : null}
           </div>
-        ) : null}
-        {!addMore && alist.length > 0 ? (
-          <div>No More Article to load</div>
-        ) : null}
+        </div>
       </div>
     </div>
   );

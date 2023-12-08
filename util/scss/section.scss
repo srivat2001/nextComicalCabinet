@@ -1,20 +1,24 @@
 @import "responsive";
-
-.section {
-  .section-topic {
-    font-size: 23px;
-    margin-left: 0px;
-    border-bottom: 1px solid #d1d1d1;
-    margin-right: 20px;
-    @include respond-to("small") {
-      margin-left: 20px;
-      margin-bottom: 20px;
-    }
-  }
-  .not-found {
-    margin-left: 0px;
-    @include respond-to("small") {
-      margin-left: 20px;
+.App {
+  .blog-display-container {
+    .sectioncontainer {
+      margin: 8px;
+      .section-topic {
+        font-size: 23px;
+        margin-left: 0px;
+        border-bottom: 1px solid #d1d1d1;
+        margin-right: 20px;
+        @include respond-to("small") {
+          margin-left: 20px;
+          margin-bottom: 20px;
+        }
+      }
+      .not-found {
+        margin-left: 0px;
+        @include respond-to("small") {
+          margin-left: 20px;
+        }
+      }
     }
   }
 }

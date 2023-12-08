@@ -126,7 +126,6 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
   return new Promise(async (resolve, reject) => {
     let articles = prevArr;
     let lowestTimestampKey = null;
-
     try {
       if (first) {
         const searchIndexRef = query(
@@ -147,7 +146,6 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
         )[0];
         lastTime = latestSearchIndexItem.time;
       }
-
       if (lastTime !== 0) {
         let searchIndexRef = "";
         if (first === true) {
@@ -196,6 +194,7 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
         }
       }
       articles = articles.reverse();
+
       if (articles.length === 0) {
         reject({ error: "No More Articles", statusCode: 404 });
       }
@@ -358,6 +357,7 @@ export const Publisharticle1 = async (
       updates["artcleSectionsGroup/" + section + "/" + key] = {
         uid: user.uid,
         blogid: key,
+        time: timestampInSeconds,
       };
       const userdetailsref = ref(db, "userdetails/" + user.uid);
       const userdetailssnapshot = await get(userdetailsref);

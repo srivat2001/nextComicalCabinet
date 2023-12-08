@@ -57,9 +57,7 @@ export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
                 <button
                   onClick={() =>
                     router.push(
-                      "/article/edit/" +
-                        slugify(data.title, { lower: false }) +
-                        "?type=edit"
+                      "/article/edit/" + slugify(data.title, { lower: false })
                     )
                   }
                 >

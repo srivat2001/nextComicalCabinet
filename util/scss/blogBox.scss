@@ -1,9 +1,11 @@
 @import "responsive";
+
 .blogs-data {
   .box {
     color: black;
-    width: 441px;
-    border-radius: 10px;
+    width: 427px;
+    margin: -4px 0px;
+
     min-height: 403px;
     border: 1px solid #c0bfbf;
     padding: 0px;
@@ -12,8 +14,10 @@
     display: block;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     position: relative;
+    height: 405px;
     @include respond-to("small") {
       display: block;
+      border-radius: 10px;
     }
     .btn-list {
       margin-left: 15px;

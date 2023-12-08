@@ -81,6 +81,10 @@ function Main({ isOnline }) {
   };
 
   useEffect(() => {
+    if (!isOnline) {
+      setwarningMessage("You are offline");
+      return () => {};
+    }
     setNextKey(0);
     setAlist([]);
     setLoded(false);
@@ -109,55 +113,59 @@ function Main({ isOnline }) {
       }
     });
   }, [reload]);
+
   return (
     <div>
-      <div className="App">
+      <div className={!loaded ? "App  loadingScreenBar" : "App"}>
         <Heading loaded={loaded} />
         <NoIntenet isOnline={isOnline} />
         <div className="top-message ">{isOnline}Whats Cooking? </div>
 
         <div className="blog-display-container">
-          <div
-            className={!loaded ? "blogs-data  loadingScreenBar" : "blogs-data"}
-          >
-            {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
-            {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
-            {alist.length > 0
-              ? alist.map((article) => (
-                  <BlogBox
-                    key={article.key}
-                    data={article}
-                    admin={admin}
-                    deleteAlert={deletedAlert}
-                    loaded={false}
-                  />
-                ))
-              : null}
-            {online && loaded && alist.length == 0 ? (
-              <div className="warning-message">{warningMessage}</div>
+          <div className="blog-holder-btn-container">
+            <div
+              className={
+                !loaded ? "blogs-data  loadingScreenBar" : "blogs-data"
+              }
+            >
+              {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
+              {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
+              {alist.length > 0
+                ? alist.map((article) => (
+                    <BlogBox
+                      key={article.key}
+                      data={article}
+                      admin={admin}
+                      deleteAlert={deletedAlert}
+                      loaded={false}
+                    />
+                  ))
+                : null}
+              {online && loaded && alist.length == 0 ? (
+                <div className="warning-message">{warningMessage}</div>
+              ) : null}
+              {loaded && !online ? (
+                <div className="warning-message">No internet Connection</div>
+              ) : null}
+            </div>
+            {addMore ? (
+              <div>
+                {" "}
+                <button
+                  onClick={() => {
+                    addmore();
+                  }}
+                >
+                  Load more
+                </button>
+              </div>
             ) : null}
-            {loaded && !online ? (
-              <div className="warning-message">No internet Connection</div>
-            ) : null}
-            {loaded && online && alist.length == 0 ? (
-              <div className="warning-message">No more article to load</div>
+            {!addMore && alist.length > 0 ? (
+              <div>
+                No More Article to load<div>{alist[0]}</div>
+              </div>
             ) : null}
           </div>
-          {addMore ? (
-            <div>
-              {" "}
-              <button
-                onClick={() => {
-                  addmore();
-                }}
-              >
-                Load more
-              </button>
-            </div>
-          ) : null}
-          {!addMore && alist.length > 0 ? (
-            <div>No More Article to load</div>
-          ) : null}
         </div>
       </div>
       <Disclaimer></Disclaimer>
