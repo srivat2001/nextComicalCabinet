@@ -14,6 +14,8 @@ import {
 import { Helmet } from "react-helmet";
 import Disclaimer from "../../util/components/footer";
 import NoIntenet from "../../util/components/internetNotFound";
+import Head from "next/head";
+import { Fragment } from "react";
 import {
   ref as sRef,
   query,
@@ -97,64 +99,62 @@ function portfolioProject({ isOnline, articleData }) {
     { url: "", label: "Article" },
   ];
   return (
-    <div>
-      <div className="App">
-        <Heading loaded={load} />
-        <NoIntenet isOnline={isOnline} />
-        <Helmet>
-          <title>{articleData.title}</title>
-          <meta name="description" content={articleData.desc} />
-          <meta property="og:title" content={articleData.title} />
-          <meta property="og:description" content={articleData.desc} />
-          <meta property="og:image" content={articleData.imglink} />
-          <meta property="og:title" content={articleData.title} />
-        </Helmet>
-        <div className="article-page">
-          {/* <Breadcomb paths={breadcrumbPaths} /> */}
-          {load ? (
-            article1 && Object.keys(article1).length ? (
-              <div>
-                <div className="heading-main">{article1.title}</div>
-                <div className="datetime">
-                  Upload date:{" "}
-                  {timeAndDateConverter(article1.date, article1.time)}
-                </div>
-                {admin ? (
-                  <Link
-                    href={
-                      "/article/edit/" +
-                      slugify(article1.title, { lower: false }) +
-                      "?type=edit"
-                    }
-                  >
-                    <button className="editbtn">Edit</button>
-                  </Link>
-                ) : null}
-                <img src={article1.imglink} />
-                <div className="article-para">
-                  {article1.desc
-                    .replace(/\\n/g, "")
-                    .replace(/\\/g, "")
-                    .split("\n")
-                    .map((paragraph, index) => {
-                      if (paragraph.length > 0)
-                        return (
-                          <div>
-                            <p key={index}>{paragraph}</p>
-                          </div>
-                        );
-                    })}
-                </div>
+    <div className="App">
+      <Heading loaded={load} />
+      <NoIntenet isOnline={isOnline} />
+      <Head>
+        <title>{articleData.title}</title>
+        <meta name="description" content={articleData.desc} />
+        <meta property="og:title" content={articleData.title} />
+        <meta property="og:description" content={articleData.desc} />
+        <meta property="og:image" content={articleData.imglink} />
+        <meta property="og:title" content={articleData.title} />
+      </Head>
+      <div className="article-page">
+        {/* <Breadcomb paths={breadcrumbPaths} /> */}
+        {load ? (
+          article1 && Object.keys(article1).length ? (
+            <div>
+              <div className="heading-main">{article1.title}</div>
+              <div className="datetime">
+                Upload date:{" "}
+                {timeAndDateConverter(article1.date, article1.time)}
               </div>
-            ) : (
-              <div>Not Found</div>
-            )
+              {admin ? (
+                <Link
+                  href={
+                    "/article/edit/" +
+                    slugify(article1.title, { lower: false }) +
+                    "?type=edit"
+                  }
+                >
+                  <button className="editbtn">Edit</button>
+                </Link>
+              ) : null}
+              <img src={article1.imglink} />
+              <div className="article-para">
+                {article1.desc
+                  .replace(/\\n/g, "")
+                  .replace(/\\/g, "")
+                  .split("\n")
+                  .map((paragraph, index) => {
+                    if (paragraph.length > 0)
+                      return (
+                        <div>
+                          <p key={index}>{paragraph}</p>
+                        </div>
+                      );
+                  })}
+              </div>
+            </div>
           ) : (
-            <div>Loading</div>
-          )}
+            <div>Not Found</div>
+          )
+        ) : (
+          <div>Loading</div>
+        )}
 
-          <Disclaimer></Disclaimer>
-        </div>
+        <Disclaimer></Disclaimer>
       </div>
     </div>
   );
