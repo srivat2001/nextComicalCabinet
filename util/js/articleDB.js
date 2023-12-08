@@ -18,11 +18,11 @@ import {
   endBefore,
   update,
 } from "firebase/database";
-import { auth, db } from "./firebaseconn";
-import { getCurrentDateTime } from "./currentTime";
+import { db, app } from "./firebaseconn";
 import { getAuth } from "firebase/auth";
+import { getCurrentDateTime } from "./currentTime";
+
 import slugify from "slugify";
-import { app } from "./firebaseconn";
 import validateInputs from "./validation";
 import { CustomError } from "../errors/CustomError";
 export const searcharticle = async (term) => {

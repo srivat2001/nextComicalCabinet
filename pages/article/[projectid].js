@@ -1,16 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { withRouter, useRouter } from "next/router";
 import Link from "next/link";
-import { searcharticle } from "../../util/js/articleDB";
 import { timeAndDateConverter } from "../../util/js/converter";
 import slugify from "slugify";
 import { Heading } from "../../util/components/heading";
 import { Breadcomb } from "../../util/components/breadcomb";
 import { auth } from "../../util/js/firebaseconn";
-import { LoggedInInfo, getUserData } from "../../util/js/articleDB";
+import {
+  LoggedInInfo,
+  getUserData,
+  searcharticle,
+} from "../../util/js/articleDB";
 import { Helmet } from "react-helmet";
 import Disclaimer from "../../util/components/footer";
 import NoIntenet from "../../util/components/internetNotFound";
+import {
+  ref as sRef,
+  query,
+  orderByChild,
+  equalTo,
+  orderByKey,
+  onValue,
+  set,
+  startAt,
+  endAt,
+  child,
+  push,
+  get,
+  remove,
+  limitToFirst,
+  limitToLast,
+  startAfter,
+  endBefore,
+  update,
+} from "firebase/database";
+import { db, app } from "../../util/js/firebaseconn";
 async function search(term) {
   try {
     const articles = await searcharticle(term); // Assuming `getArticles` is an asynchronous function that retrieves the articles
@@ -21,13 +45,13 @@ async function search(term) {
   }
 }
 
-function portfolioProject({ isOnline }) {
+function portfolioProject({ isOnline, articleData }) {
   const router = useRouter();
   const [article1, setAricle] = useState(null);
   const [load, loaded] = useState(false);
   const [admin, isAdmin] = useState(false);
   const [userdata, setUserData] = useState({});
-  console.log(router);
+  console.log(articleData);
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       LoggedInInfo(user)
@@ -77,18 +101,18 @@ function portfolioProject({ isOnline }) {
       <div className="App">
         <Heading loaded={load} />
         <NoIntenet isOnline={isOnline} />
+        <Helmet>
+          <title>{articleData.title}</title>
+          <meta name="description" content={articleData.desc} />
+          <meta property="og:title" content={articleData.title} />
+          <meta property="og:description" content={articleData.desc} />
+          <meta property="og:image" content={articleData.imglink} />
+        </Helmet>
         <div className="article-page">
           {/* <Breadcomb paths={breadcrumbPaths} /> */}
           {load ? (
             article1 && Object.keys(article1).length ? (
               <div>
-                <Helmet>
-                  <title>{article1.title}</title>
-                  <meta name="description" content={article1.desc} />
-                  <meta property="og:title" content={article1.title} />
-                  <meta property="og:description" content={article1.desc} />
-                  <meta property="og:image" content={article1.imglink} />
-                </Helmet>
                 <div className="heading-main">{article1.title}</div>
                 <div className="datetime">
                   Upload date:{" "}
@@ -135,3 +159,18 @@ function portfolioProject({ isOnline }) {
   );
 }
 export default portfolioProject;
+export async function getServerSideProps(context) {
+  const { params } = context;
+  const projectid = params?.projectid;
+  console.log(projectid);
+  console.log(db);
+  //  const searchIndexRef = sRef(db, "searchIndex/" + projectid);
+  const articleSnapshot = await searcharticle(projectid);
+  //const res = await fetch("https://api.github.com/repos/vercel/next.js");
+  console.log(articleSnapshot);
+  return {
+    props: {
+      articleData: articleSnapshot,
+    },
+  };
+}

@@ -20,6 +20,10 @@ if (typeof window !== "undefined") {
   db = getDatabase(app);
   analytics = getAnalytics(app);
   auth = getAuth(app);
+} else {
+  app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  auth = getAuth(app);
 }
 
 export { app, db, analytics, firebaseConfig, auth };
