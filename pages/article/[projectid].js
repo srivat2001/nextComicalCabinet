@@ -107,6 +107,7 @@ function portfolioProject({ isOnline, articleData }) {
           <meta property="og:title" content={articleData.title} />
           <meta property="og:description" content={articleData.desc} />
           <meta property="og:image" content={articleData.imglink} />
+          <meta property="og:title" content={articleData.title} />
         </Helmet>
         <div className="article-page">
           {/* <Breadcomb paths={breadcrumbPaths} /> */}

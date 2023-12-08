@@ -27,12 +27,7 @@ class MyDocument extends Document {
           <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
 
           <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-          <meta property="og:title" content="The Comical Cabinet" />
-          <meta
-            property="og:description"
-            content="the upcoming satire Portal"
-          />
-          <meta property="og:image" content="%PUBLIC_URL%/TCB_Banner.png" />
+
           <meta
             property="og:url"
             content="https://thecomicalcabinet.netlify.app/"
