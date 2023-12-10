@@ -16,9 +16,6 @@ export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
   };
 
   const router = useRouter();
-  useEffect(() => {
-    console.log(data);
-  }, []);
   return (
     <div className={loaded ? "box loadingScreenBar boxloading" : "box"}>
       {data && Object.keys(data).length ? (
@@ -37,7 +34,7 @@ export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
             <div className="line"></div>
             <p className="desc">
               {data.desc.split(" ").length > 15
-                ? data.desc.split(" ").slice(0, 15).join(" ") + "..."
+                ? data.desc.split(" ").slice(0, 14).join(" ") + "..."
                 : data.desc}
             </p>
             {admin ? (

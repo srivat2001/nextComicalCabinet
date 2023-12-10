@@ -154,7 +154,7 @@ export const Heading = ({ loaded }) => {
                     <span>Sign out</span>
                   </button>
                 </a>
-                <Link href="/article/add">
+                <Link href="/article/add/new">
                   <button className="upload-btn ">
                     <FontAwesomeIcon icon={faUpload} />
                   </button>
@@ -199,13 +199,10 @@ export const Heading = ({ loaded }) => {
             <div className="mobile-login-logout-container">
               {Object.keys(state.loggedData).length ? (
                 <div className="btn-holder">
-                  <a onClick={signOutbtn}>
-                    <div className="btnproxy">
-                      <i class="fa fa-sign-out"></i>
-                      <span>Sign out</span>
-                    </div>
-                  </a>
-
+                  <button className="upload-btn " onClick={signOutbtn}>
+                    <FontAwesomeIcon icon={faSignOutAlt} />
+                    <span>Sign out</span>
+                  </button>
                   {/* <Link to="/article/add-article"></Link> */}
 
                   <Link href="/article/add-article">

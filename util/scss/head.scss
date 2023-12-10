@@ -5,6 +5,9 @@ header {
     background-color: white;
     color: black;
     padding: 1rem 0px 0px 0px;
+    @include respond-to("header-mobile") {
+      display: block;
+    }
     @include respond-to("small") {
       display: block;
       text-align: left;
@@ -35,6 +38,9 @@ header {
         margin-top: 20px;
         margin-bottom: 0px;
       }
+      @include respond-to("header-mobile") {
+        margin-left: 0px;
+      }
       .welcome-message {
         text-align: right;
         margin-bottom: 10px;
@@ -44,11 +50,15 @@ header {
         @include respond-to("small") {
           display: none;
         }
+
         .btn-holder {
           display: flex;
           gap: 10px;
           float: right;
           margin-right: 17px;
+          @include respond-to("header-mobile") {
+            float: none;
+          }
         }
         a {
           button {
@@ -64,6 +74,9 @@ header {
             padding: 10px;
             border-radius: 35px;
             color: #414141;
+
+            @include respond-to("mobile") {
+            }
           }
           &:first-child {
             margin: 5px;
@@ -163,10 +176,11 @@ header {
         .btn-holder {
           display: flex;
         }
-        a.upload-btn {
+        button.upload-btn {
           padding: 10px;
           border-radius: 35px;
           color: #5e5757;
+          margin-right: 10px;
 
           @include respond-to("small") {
             position: relative;

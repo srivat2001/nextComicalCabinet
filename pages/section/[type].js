@@ -1,25 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Heading } from "../../util/components/heading";
-import Link from "next/link";
 import { auth } from "../../util/js/firebaseconn";
-import { withRouter, useRouter } from "next/router";
+import { useRouter } from "next/router";
 
-import {
-  searcharticle,
-  Publisharticle1,
-  LoggedInInfo,
-  fetchArticleSections,
-  getArticlesBySection,
-  getArticleByScroll,
-} from "../../util/js/articleDB";
+import { LoggedInInfo, getArticleByScroll } from "../../util/js/articleDB";
 
 import { BlogBox } from "../../util/components/blogBox";
 
-export default function Section({ isOnline }) {
-  function deleteData() {}
+export default function Section({ isOnline, routerloaded }) {
   const [alist, setAlist] = useState([]);
   const router = useRouter();
-
   const [actionMessage, setActionMessage] = useState("Loading");
   const [admin, isAdmin] = useState(false);
   const [reload, setReload] = useState(false);
@@ -29,11 +19,6 @@ export default function Section({ isOnline }) {
   const [loaded, setLoded] = useState(false);
   const [addMore, setAddMore] = useState(false);
   const [type, setType] = useState("");
-  // const { data, isLoading, isError } = useArticleByScroll([], FirstTime, nextKey);
-
-  function delete1() {
-    //  updatedata(setAlist);
-  }
 
   const addmore = async () => {
     try {
@@ -96,22 +81,23 @@ export default function Section({ isOnline }) {
 
     EffectRan.current = false;
   }, [type, reload, router, isOnline]);
+
   return (
     <div>
-      <div className="App section">
+      <div
+        className={!loaded || !routerloaded ? "App  mainloadingScreen" : "App"}
+      >
         <div className="blog-display-container">
           <Heading loaded={loaded} />
           <div className="sectioncontainer">
             <div className="section-topic">{type}</div>
-            <div className="blogs-data">
+            <div
+              className={
+                !loaded ? "blogs-data  loadingScreenBar" : "blogs-data"
+              }
+            >
               {alist.length > 0 ? (
-                alist.map((article) => (
-                  <BlogBox
-                    data={article}
-                    admin={admin}
-                    deleteAlert={deletedAlert}
-                  />
-                ))
+                alist.map((article) => <BlogBox data={article} admin={admin} />)
               ) : (
                 <div className="not-found">{actionMessage}</div>
               )}

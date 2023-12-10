@@ -5,39 +5,23 @@ import { timeAndDateConverter } from "../../util/js/converter";
 import slugify from "slugify";
 import { Heading } from "../../util/components/heading";
 import { auth } from "../../util/js/firebaseconn";
-import {
-  LoggedInInfo,
-  getUserData,
-  searcharticle,
-} from "../../util/js/articleDB";
+import { LoggedInInfo, searcharticle } from "../../util/js/articleDB";
 import Disclaimer from "../../util/components/footer";
 import NoIntenet from "../../util/components/internetNotFound";
 import Head from "next/head";
 
-import { db, app } from "../../util/js/firebaseconn";
-async function search(term) {
-  try {
-    const articles = await searcharticle(term); // Assuming `getArticles` is an asynchronous function that retrieves the articles
-    return articles;
-  } catch (error) {
-    console.error("Error retrieving articles:", error);
-    return [];
-  }
-}
+import { db } from "../../util/js/firebaseconn";
 
-function portfolioProject({ isOnline, articleData }) {
+function portfolioProject({ isOnline, routerloaded, articleData }) {
   const router = useRouter();
-  const [article1, setAricle] = useState(null);
   const [load, loaded] = useState(false);
   const [admin, isAdmin] = useState(false);
-  const [userdata, setUserData] = useState({});
   console.log(articleData);
   if (typeof window !== "undefined") {
     if (!articleData) {
       router.push("404");
     }
   }
-
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       LoggedInInfo(user)
@@ -55,35 +39,9 @@ function portfolioProject({ isOnline, articleData }) {
           isAdmin(false);
         });
     });
-    console.log(router);
-    if (router.query.projectid) {
-      console.log(router.query.projectid);
-      search(router.query.projectid).then(async (arlist) => {
-        if (arlist) {
-          loaded(true);
-          setAricle(arlist);
-          console.log(arlist.desc);
-          console.log(arlist.desc.split("\n"));
-        } else {
-          loaded(true);
-
-          setAricle({});
-        }
-        console.log(arlist);
-        getUserData(arlist.uid).then((val) => {
-          setUserData(val);
-        });
-      });
-    } else {
-      loaded(true);
-    }
   }, [router]);
-  const breadcrumbPaths = [
-    { url: "/", label: "Home" },
-    { url: "", label: "Article" },
-  ];
   return (
-    <div className="App">
+    <div className={!load || !routerloaded ? "App  mainloadingScreen" : "App"}>
       <Heading loaded={load} />
       <NoIntenet isOnline={isOnline} />
       <Head>
@@ -102,27 +60,27 @@ function portfolioProject({ isOnline, articleData }) {
       <div className="article-page">
         {/* <Breadcomb paths={breadcrumbPaths} /> */}
         {load ? (
-          article1 && Object.keys(article1).length ? (
+          articleData && Object.keys(articleData).length ? (
             <div>
-              <div className="heading-main">{article1.title}</div>
+              <div className="heading-main">{articleData.title}</div>
               <div className="datetime">
                 Upload date:{" "}
-                {timeAndDateConverter(article1.date, article1.time)}
+                {timeAndDateConverter(articleData.date, articleData.time)}
               </div>
               {admin ? (
                 <Link
                   href={
                     "/article/edit/" +
-                    slugify(article1.title, { lower: false }) +
+                    slugify(articleData.title, { lower: false }) +
                     "?type=edit"
                   }
                 >
                   <button className="editbtn">Edit</button>
                 </Link>
               ) : null}
-              <img src={article1.imglink} />
+              <img src={articleData.imglink} />
               <div className="article-para">
-                {article1.desc
+                {articleData.desc
                   .replace(/\\n/g, "")
                   .replace(/\\/g, "")
                   .split("\n")
@@ -152,12 +110,8 @@ export default portfolioProject;
 export async function getServerSideProps(context) {
   const { params } = context;
   const projectid = params?.projectid;
-  console.log(projectid);
-  console.log(db);
-  //  const searchIndexRef = sRef(db, "searchIndex/" + projectid);
   const articleSnapshot = await searcharticle(projectid);
   if (articleSnapshot) {
-    console.log(articleSnapshot);
     return {
       props: {
         articleData: articleSnapshot,
@@ -166,10 +120,9 @@ export async function getServerSideProps(context) {
   } else {
     return {
       redirect: {
-        destination: "/404", // Adjust the path accordingly
+        destination: "/404",
         permanent: false,
       },
     };
   }
-  //const res = await fetch("https://api.github.com/repos/vercel/next.js");
 }

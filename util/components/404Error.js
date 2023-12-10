@@ -5,9 +5,9 @@ const Custom404 = ({ isOnline }) => {
     <div>
       <div className="App">
         <Heading loaded={true} />
-        <div>
+        <div className="pagenotfound">
           {typeof window !== "undefined" && isOnline ? (
-            <div suppressHydrationWarning>Page not found</div>
+            <h1>Page not found</h1>
           ) : null}
         </div>
       </div>

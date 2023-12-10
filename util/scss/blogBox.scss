@@ -3,9 +3,7 @@
 .blogs-data {
   .box {
     color: black;
-    width: 427px;
-    margin: -4px 0px;
-
+    width: 386px;
     min-height: 403px;
     border: 1px solid #c0bfbf;
     padding: 0px;
@@ -14,10 +12,16 @@
     display: block;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     position: relative;
-    height: 405px;
+    height: auto;
+    margin: auto;
     @include respond-to("small") {
       display: block;
       border-radius: 10px;
+      justify-content: center;
+      width: 400px;
+      height: auto;
+      margin: 0px;
+      margin-bottom: 10px;
     }
     .btn-list {
       margin-left: 15px;
@@ -55,8 +59,10 @@
       text-align: left;
       font-weight: 400;
       padding: 1rem;
-
       padding-top: 0px;
+      padding-bottom: 8px;
+      @include respond-to("small") {
+      }
       a {
         color: inherit;
         text-decoration: none;

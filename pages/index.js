@@ -1,36 +1,22 @@
 import { BlogBox } from "../util/components/blogBox";
-import React, { useEffect, useState, useReducer, useRef } from "react";
-import { getArticles } from "../util/js/articleDB";
+import React, { useEffect, useState, useContext } from "react";
 import Disclaimer from "../util/components/footer";
 import { Heading } from "../util/components/heading";
-import { useOnline } from "react-detect-offline";
-
 import { auth } from "../util/js/firebaseconn";
 import { LoggedInInfo, getArticleByScroll } from "../util/js/articleDB";
-import cooking from "../util/img/cooking.gif";
-import NoIntenet from "../util/components/internetNotFound";
-
-function Main({ isOnline }) {
-  const [alist, setAlist] = useState([]);
-  const [admin, isAdmin] = useState(false);
-  const [nextKey, setNextKey] = useState(0);
-  const [FirstTime, setFirstTime] = useState(true);
-  const EffectRan = useRef(true);
-  const [loaded, setLoded] = useState(false);
-  const [reload, setReload] = useState(false);
-  const [addMore, setAddMore] = useState(false);
-  const [actionMessage, setActionMessage] = useState("Loading");
-  const [warningMessage, setwarningMessage] = useState(
-    "Blogs will be uploaded soon"
-  );
+import { useRouter } from "next/router";
+function Main({ isOnline, routerloaded }) {
+  const [alist, setAlist] = useState([]); //ArticleList
+  const [admin, isAdmin] = useState(false); //Yes if admin
+  const [nextKey, setNextKey] = useState(0); //Next Key of article Which needs to be loaded when clicked on load more
+  const [FirstTime, setFirstTime] = useState(true); //true when article loaded fot the firstTime
+  const [loaded, setLoded] = useState(false); //when any promises are running
+  const [addMore, setAddMore] = useState(false); //true when new articles can be loaded
+  const [warningMessage, setwarningMessage] = useState("loading");
   const [online, setOnline] = useState(false);
-  function delete1() {
-    //  updatedata(setAlist);
-  }
 
-  async function getdata(arr, firstTime, nextVal, reftype = "searchIndex") {
-    return getArticleByScroll([], firstTime, nextVal, reftype);
-  }
+  //Add article
+
   const addmore = async () => {
     try {
       const val = await getArticleByScroll(
@@ -44,25 +30,25 @@ function Main({ isOnline }) {
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
       setAddMore(true);
-
       setActionMessage("Loaded Successfully");
     } catch (error) {
-      if (error.statusCode === 404) {
-        setActionMessage(error.error);
-        setAddMore(false);
+      if (error.statusCode === 401) {
+        setwarningMessage(error.error);
+      } else if (error.statusCode === 404) {
+        setwarningMessage(error.error);
       }
+      setAddMore(false);
     }
   };
+
+  //alert when deleted
   const deletedAlert = (uid, key) => {
     alert("deleted");
-    console.log(alist, key);
-
     const updatedItems = alist.filter((item) => item.key !== key);
-
-    // Update the state with the new array
     setAlist(updatedItems);
-    // setReload((reload) => !reload);
   };
+
+  //ping for internet speed test
   const ping = async (url) => {
     try {
       const response = await fetch(url, { method: "HEAD" });
@@ -75,20 +61,18 @@ function Main({ isOnline }) {
     const isInternetWorking = await ping("https://httpbin.org/get");
     return isInternetWorking;
   };
-  const handleOffline = () => {
-    console.log("Offline event detected");
-    // Add any additional logic you want to run when offline
-  };
 
   useEffect(() => {
+    console.log(isOnline);
     if (!isOnline) {
+      setLoded(false);
+      setOnline(false);
       setwarningMessage("You are offline");
       return () => {};
     }
     setNextKey(0);
     setAlist([]);
     setLoded(false);
-
     checkInternet().then((isOnline) => {
       if (isOnline) {
         addmore().then(() => setLoded(true));
@@ -112,15 +96,15 @@ function Main({ isOnline }) {
         setwarningMessage("Internet not available");
       }
     });
-  }, [reload]);
+  }, []);
 
   return (
     <div>
-      <div className={!loaded ? "App  loadingScreenBar" : "App"}>
+      <div
+        className={!routerloaded || !loaded ? "App  mainloadingScreen" : "App"}
+      >
         <Heading loaded={loaded} />
-        <NoIntenet isOnline={isOnline} />
         <div className="top-message ">{isOnline}Whats Cooking? </div>
-
         <div className="blog-display-container">
           <div className="blog-holder-btn-container">
             <div
@@ -145,7 +129,7 @@ function Main({ isOnline }) {
                 <div className="warning-message">{warningMessage}</div>
               ) : null}
               {loaded && !online ? (
-                <div className="warning-message">No internet Connection</div>
+                <div className="warning-message">{warningMessage}</div>
               ) : null}
             </div>
             {addMore ? (
@@ -161,9 +145,7 @@ function Main({ isOnline }) {
               </div>
             ) : null}
             {!addMore && alist.length > 0 ? (
-              <div>
-                No More Article to load<div>{alist[0]}</div>
-              </div>
+              <div>No More Article to load</div>
             ) : null}
           </div>
         </div>

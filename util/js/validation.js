@@ -1,7 +1,7 @@
 export default function validateInputs(title, imglink, para, section) {
   const validationProblems = [];
-  if (title.length < 1 || title.length > 180) {
-    validationProblems.push("Title should be between 1 and 180 characters.");
+  if (title.length < 20 || title.length > 180) {
+    validationProblems.push("Title should be between 20 and 180 characters.");
   }
 
   if (!/^https?:\/\/.*\.(jpe?g|png)(\?.*)?$/i.test(imglink)) {

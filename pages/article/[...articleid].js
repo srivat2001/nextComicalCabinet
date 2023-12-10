@@ -7,7 +7,7 @@ import {
   LoggedInInfo,
   fetchArticleSections,
 } from "../../util/js/articleDB";
-import { withRouter, useRouter } from "next/router";
+import { useRouter } from "next/router";
 const useAutosizeInput = (remainwords) => {
   const [value, setValue] = useState("");
   const [remainingChars, setRemainingChars] = useState(remainwords);
@@ -46,19 +46,13 @@ const useAutosizeInput = (remainwords) => {
 async function loadArticles(paramValue, uid) {
   return await searcharticle(paramValue, uid);
 }
-function PublishArticle({}) {
+function PublishArticle({ isOnline, routerloaded, articleData }) {
   const router = useRouter();
   const [found, Setfound] = useState(0);
-  const [oldTitle, setOldTitle] = useState("");
   const [admin, setAdmin] = useState(false);
   const [load, setLoad] = useState(0);
   const [articleID, setArticleID] = useState("");
   const [oldDetails, setOldDetails] = useState({});
-  const [breadcrumbPaths, setBreadcrumbPaths] = useState([
-    { url: "/", label: "Home" },
-    { url: "", label: "Aricle" },
-    { url: "/add", label: "Add Article" },
-  ]);
   const titleInput = useAutosizeInput(120, true);
   const Imglink = useAutosizeInput(3000, false);
   const Para = useAutosizeInput(80000, false);
@@ -68,22 +62,14 @@ function PublishArticle({}) {
   const [type, setType] = useState("Add");
   const loadArticlesIfexists = (uid, articleid = null) => {
     console.log(uid, articleid, type);
-    setBreadcrumbPaths([
-      { url: "/", label: "Home" },
-      { url: "", label: "Aricle" },
-      { url: "", label: "Edit Article" },
-    ]);
 
     loadArticles(articleid).then((details) => {
       if (details) {
         setOldDetails(details);
-
         titleInput.handleInputChange(details.title);
         Imglink.handleInputChange(details.imglink);
         Para.handleInputChange(details.desc);
-        setOldTitle(details.title);
         setSection(details.section);
-        setArticleID(details.key);
         Setfound(1);
       } else {
         Setfound(0);
@@ -119,12 +105,16 @@ function PublishArticle({}) {
       LoggedInInfo(user)
         .then((result) => {
           setuser(user);
-          if (result.isAdmin) {
+          if (result.isAdmin && router.query.articleid) {
             setAdmin(true);
-            if (router.query.articleid && router.query.articleid[0] == "edit") {
+            if (router.query.articleid[0] == "edit") {
               loadArticlesIfexists(user.uid, router.query.articleid[1]);
             } else if (router.query.articleid[0] == "add") {
-              setLoad(1);
+              if (router.query.articleid[1] !== "new") {
+                router.push("/404");
+              } else {
+                setLoad(1);
+              }
             }
           } else {
             setAdmin(false);
@@ -141,7 +131,9 @@ function PublishArticle({}) {
 
   return (
     <div>
-      <div className="App">
+      <div
+        className={!load || !routerloaded ? "App  mainloadingScreen" : "App"}
+      >
         <Heading loaded={load} />
         <div className="publish-page">
           {load ? (
@@ -150,7 +142,7 @@ function PublishArticle({}) {
                 {type === "edit" ? "Edit" : "Add"} Article
               </div>
               {load ? (
-                (found || type == "add") && admin == true ? (
+                (found || type == "add" || type == "edit") && admin == true ? (
                   <div>
                     <label className="textarea-label">Enter Your Title</label>
                     <textarea
@@ -214,21 +206,24 @@ function PublishArticle({}) {
                       ))}
                     </select>
 
-                    <div className="warning">{warning.join(", ")}</div>
+                    <div className="warning">{warning}</div>
                     <button
                       disabled={!admin}
                       onClick={async (e) => {
-                        SetWarning(
-                          await Publisharticle1(
-                            titleInput.value,
-                            Para.value,
-                            Imglink.value,
-                            articleID,
-                            section,
-                            oldDetails,
-                            user
-                          )
+                        const result = await Publisharticle1(
+                          titleInput.value,
+                          Para.value,
+                          Imglink.value,
+                          articleID,
+                          section,
+                          oldDetails,
+                          user
                         );
+                        console.log(result);
+                        SetWarning(result.message);
+                        if (result.type == "update" && result.type == 200) {
+                          setOldDetails(result.data);
+                        }
                       }}
                     >
                       Publish

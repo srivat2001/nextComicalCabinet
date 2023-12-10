@@ -2,38 +2,27 @@ import {
   ref,
   query,
   orderByChild,
-  equalTo,
-  orderByKey,
   onValue,
   set,
-  startAt,
   endAt,
   child,
   push,
   get,
   remove,
-  limitToFirst,
   limitToLast,
-  startAfter,
   endBefore,
   update,
 } from "firebase/database";
 import { db, app } from "./firebaseconn";
 import { getAuth } from "firebase/auth";
 import { getCurrentDateTime } from "./currentTime";
-
+import Response from "./response";
 import slugify from "slugify";
 import validateInputs from "./validation";
 import { CustomError } from "../errors/CustomError";
 export const searcharticle = async (term) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log(term);
-      const slugifiedTitle = slugify(
-        "Unveiling the Myth: Photography, the Comedy in Every Snapshot",
-        { lower: false }
-      );
-      console.log(slugifiedTitle);
       const searchIndexRef = ref(db, "searchIndex/" + term);
       const searchIndexSnapshot = await get(searchIndexRef);
 
@@ -60,47 +49,7 @@ export const searcharticle = async (term) => {
     }
   });
 };
-// export const getArticleByScroll = async (prevArr,first = true,lastTime=0) => {
-//   const articles = [];
 
-//   try {
-//     if (first) {
-//       const searchIndexRef = query(
-//         ref(db, "searchIndex"),
-//         orderByChild("time"),
-
-//         limitToLast(1) // End at the specified key
-//       );
-//       const searchIndexSnapshot = await get(searchIndexRef);
-//       const lastey = searchIndexSnapshot.val();
-//       const latestSearchIndexItem = Object.values(searchIndexSnapshot.val())[0];
-//       lastTime = latestSearchIndexItem.time;
-//       }
-//       if (lastTime>0) {
-//         const searchIndexRef = query(
-//           ref(db, "searchIndex"),
-//           orderByChild("time"),
-//           endAt(lastTime),
-//           limitToLast(3) // End at the specified key
-//         );
-//         const searchIndexSnapshot = await get(searchIndexRef);
-//         const lastKey = searchIndexSnapshot.val();
-//         console.log(lastKey);
-//       }
-
-//     // const searchIndexRef = query(
-//     //   ref(db, "searchIndex"),
-//     //   orderByChild("time"),
-//     //   startAt(1700890197), // Order by keys
-//     //   limitToFirst(5) // End at the specified key
-//     // );
-
-//     return articles;
-//   } catch (error) {
-//     console.error("Error fetching articles by scroll:", error);
-//     throw new Error("Error fetching articles by scroll");
-//   }
-// };
 export const deletedata = (id, uid, title, section) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -126,6 +75,10 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
   return new Promise(async (resolve, reject) => {
     let articles = prevArr;
     let lowestTimestampKey = null;
+    setTimeout(
+      () => reject(new CustomError("ITs taking too long to load", 401)),
+      5000
+    );
     try {
       if (first) {
         const searchIndexRef = query(
@@ -229,100 +182,63 @@ export const fetchArticleSections = async () => {
   });
 };
 
-export const getArticles = async () => {
-  return new Promise(async (resolve, reject) => {
-    const articlesList = [];
-
-    try {
-      const usersRef = ref(db, "/articles/");
-      const usersSnapshot = await get(usersRef);
-      if (usersSnapshot.exists()) {
-        const userIDs = Object.keys(usersSnapshot.val());
-        for (const userId of userIDs) {
-          const userArticlesRef = ref(db, `/articles/${userId}`);
-          const snapshot = await get(userArticlesRef);
-          if (snapshot.exists()) {
-            const userArticles = snapshot.val();
-            for (const articleKey in userArticles) {
-              const articleData = userArticles[articleKey];
-
-              articlesList.push(articleData);
-            }
-          }
-        }
-      }
-
-      resolve(articlesList);
-    } catch (error) {
-      console.error("Error retrieving articles:", error);
-      reject("Problem With Backend Connection");
+const checkIfArticleExists = async (slugifiedtitle) => {
+  const sectionsRef = ref(db, `searchIndex/${slugifiedtitle}`);
+  const sectionsSnapshot = await get(sectionsRef);
+  if (sectionsSnapshot.exists()) return true;
+  return false;
+};
+const updateArticle = async (oldDetails, updatedData, newSlugifiedtitle) => {
+  const updates = {};
+  Object.keys(oldDetails).forEach((pararm) => {
+    if (
+      oldDetails.hasOwnProperty(pararm) &&
+      oldDetails[pararm] !== updatedData[pararm]
+    ) {
+      updates[`/articles/${oldDetails.uid}/${oldDetails.key}/${pararm}`] =
+        updatedData[pararm];
     }
   });
+
+  if (oldDetails.title !== updatedData.title) {
+    await remove(
+      ref(db, "searchIndex/" + slugify(oldDetails.title, { lower: false }))
+    );
+    updates["searchIndex/" + newSlugifiedtitle];
+  }
+  if (oldDetails.section !== updatedData.section) {
+    await remove(
+      ref(db, `artcleSectionsGroup/${oldDetails.section}/${oldDetails.key}`)
+    );
+    updates[`artcleSectionsGroup/${updatedData.section}/${oldDetails.key}`];
+  }
+  console.log(updates);
+  //  await update(ref(db), updates);
+  return { status: 200, message: "Updated Successfully" };
 };
-
-// export const getArticles = async () => {
-//   return new Promise(async (resolve, reject) => {
-//     const articles = [];
-//     const usersRef = ref(db, "/articles/");
-//     const usersSnapshot = await get(usersRef);
-//     console.log(usersSnapshot.val());
-//     try {
-//       const query = ref(db, "/articles/j9kOTr52eiSwBsq0hnhgMVv8jIG2/");
-//       onValue(
-//         query,
-//         (snapshot) => {
-//           const articlebase = snapshot.val();
-
-//           for (const key in articlebase) {
-//             articles.push(articlebase[key]);
-//           }
-//           const articlesList = articles.map((article) => {
-//             return new Article(
-//               article.title,
-//               article.imglink,
-//               article.desc,
-
-//               article.date,
-//               article.key
-//             );
-//           });
-//           resolve(articlesList);
-//         },
-//         (error) => {
-//           console.log(error);
-//         }
-//       );
-//     } catch (error) {
-//       console.error("Error retrieving articles:", error);
-//       reject("Problem With Backend Connection");
-//     }
-//   });
-// };
-
 export const Publisharticle1 = async (
   title,
   desc,
   imglink,
   articleID,
   section,
-  olddetails,
-  user
+  oldDetails
 ) => {
-  const validationProblems = validateInputs(title, imglink, desc, section);
-  if (validationProblems.length !== 0) {
-    return validationProblems;
-  }
-  let key = articleID;
+  return new Promise(async (resolve, reject) => {
+    const validationProblems = validateInputs(title, imglink, desc, section);
 
-  try {
-    if (key.length === 0) {
-      key = push(child(ref(db), "/articles/")).key;
+    if (validationProblems.length !== 0) {
+      resolve(new Response(validationProblems.join(" "), 401, "add"));
     }
-    const auth = getAuth(app);
-    const user = auth.currentUser;
-
-    if (user) {
-      await set(ref(db, "articles/" + user.uid + "/" + key), {
+    try {
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+      console.log(user);
+      if (!user) {
+        resolve(new Response("Forbidden", 401, "add"));
+      }
+      let key = "";
+      let Inputdata = {
         date: getCurrentDateTime().date,
         time: getCurrentDateTime().time,
         title: title,
@@ -331,107 +247,52 @@ export const Publisharticle1 = async (
         key: key,
         uid: user.uid,
         section: section,
-      });
+      };
+      const newSlugifiedtitle = slugify(title, { lower: false });
 
+      if (!oldDetails.hasOwnProperty("key")) {
+        key = push(child(ref(db), "/articles/")).key;
+        Inputdata.key = key;
+      } else {
+        Inputdata["key"] = oldDetails.key;
+        const result = await updateArticle(
+          oldDetails,
+          Inputdata,
+          newSlugifiedtitle
+        );
+
+        resolve(new Response("Updated Successfully", 200, "update", Inputdata));
+      }
+      if (checkIfArticleExists(newSlugifiedtitle)) {
+        resolve(new Response("Title already Exists", 403, "add"));
+      }
+      const searchIndexUpdates = {};
       const currentDate = new Date();
       const timestampInSeconds = Math.floor(currentDate.getTime() / 1000);
-      let searchIndexData = {
+      searchIndexUpdates[`/articles/${user.uid}/${Inputdata.key}`] = Inputdata;
+      const articleMetaData = {
         uid: user.uid,
         blogid: key,
         time: timestampInSeconds,
       };
-
-      if (olddetails.length > 0 && olddetails.title !== title) {
-        console.log("title changed");
-        olddetails.title = slugify(olddetails.title, { lower: false });
-        const oldTitleRef = ref(db, "searchIndex/" + olddetails.title);
-        const oldTitleSnapshot = await get(oldTitleRef);
-        if (oldTitleSnapshot.exists()) {
-          searchIndexData = oldTitleSnapshot.val();
-          await set(oldTitleRef, null);
-        }
-      }
-      const updates = {};
-      title = slugify(title, { lower: false });
-      updates["/searchIndex/" + title] = searchIndexData;
-      updates["artcleSectionsGroup/" + section + "/" + key] = {
-        uid: user.uid,
-        blogid: key,
-        time: timestampInSeconds,
-      };
-      const userdetailsref = ref(db, "userdetails/" + user.uid);
-      const userdetailssnapshot = await get(userdetailsref);
-      if (!userdetailssnapshot.exists()) {
-        updates["/userdetails/" + user.uid] = searchIndexData;
-      }
-
-      update(ref(db), updates);
-      return ["Added Successfully"];
-    } else {
-      throw new Error("User not authenticated");
-    }
-  } catch (error) {
-    console.error("Error adding data: ", error.message);
-    if (error.code === "PERMISSION_DENIED") {
-      return ["Permission Denied, You Dont have write access"];
-    } else {
-      return ["Error adding data"];
-    }
-  }
-};
-export const getArticlesBySection = async (sectionTerm) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Reference to the "artcleSectionsGroup" node for the specified sectionTerm
-      const sectionGroupRef = ref(db, `artcleSectionsGroup/${sectionTerm}`);
-      const sectionGroupSnapshot = await get(sectionGroupRef);
-
-      if (sectionGroupSnapshot.exists()) {
-        const storiesData = sectionGroupSnapshot.val();
-        const storyIds = Object.keys(storiesData);
-
-        // Retrieve articles for each story id
-        const articlesArray = await Promise.all(
-          storyIds.map(async (storyId) => {
-            const { uid, blogid } = storiesData[storyId];
-
-            // Reference to the article in the "articles" node
-            const articleRef = ref(db, `articles/${uid}/${blogid}`);
-            const articleSnapshot = await get(articleRef);
-
-            if (articleSnapshot.exists()) {
-              return articleSnapshot.val();
-            } else {
-              return null; // Article not found for the current story id
-            }
-          })
-        );
-
-        // Filter out null values (articles that were not found)
-        const filteredArticlesArray = articlesArray.filter(
-          (article) => article !== null
-        );
-
-        resolve(filteredArticlesArray);
+      searchIndexUpdates[
+        `/artcleSectionsGroup/${Inputdata.section}/${Inputdata.key}`
+      ] = articleMetaData;
+      searchIndexUpdates[`/searchIndex/${newSlugifiedtitle}`] = articleMetaData;
+      console.log(searchIndexUpdates);
+      //  await update(ref(db), searchIndexUpdates);
+      resolve(resolve(new Response("Added Successfully", 200, "add")));
+    } catch (error) {
+      console.error("Error adding/updating data: ", error.message);
+      if (error.code === "PERMISSION_DENIED") {
+        reject(["Permission Denied, You Don't have write access"]);
       } else {
-        resolve([]); // No stories found for the specified section term
+        reject(["Error adding/updating data"]);
       }
-    } catch (error) {
-      console.error("Error getting articles by section:", error);
-      reject("Error getting articles by section");
     }
   });
 };
-export const getUserData = (uid) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const userRecord = {};
-      resolve(userRecord);
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
+
 export const LoggedInInfo = async (user) => {
   return new Promise((resolve, reject) => {
     const timeoutDuration = 5000; // Adjust the timeout duration as needed (in milliseconds)

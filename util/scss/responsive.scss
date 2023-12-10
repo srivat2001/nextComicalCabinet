@@ -4,6 +4,16 @@
       @content;
     }
   }
+  @if $breakpoint == "medium" {
+    @media (min-width: 400px) and (max-width: 900px) {
+      @content;
+    }
+  }
+  @if $breakpoint == "header-mobile" {
+    @media (min-width: 998px) and (max-width: 1198px) {
+      @content;
+    }
+  }
   @if $breakpoint == "mobile" {
     @media (min-width: 330px) and (max-width: 502px) {
       @content;
