@@ -79,6 +79,7 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
       () => reject(new CustomError("ITs taking too long to load", 401)),
       5000
     );
+
     try {
       if (first) {
         const searchIndexRef = query(
@@ -99,6 +100,7 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
         )[0];
         lastTime = latestSearchIndexItem.time;
       }
+      console.log(lastTime);
       if (lastTime !== 0) {
         let searchIndexRef = "";
         if (first === true) {
@@ -122,9 +124,8 @@ export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
         if (searchIndexSnapshot.exists()) {
           const searchIndexData = searchIndexSnapshot.val();
           const lastKeys = Object.keys(searchIndexData);
-
+          console.log(searchIndexData, lastKeys);
           for (const key of lastKeys) {
-            // Fetch article using the key
             const articleRef = ref(
               db,
               `articles/${searchIndexData[key].uid}/${searchIndexData[key].blogid}`
@@ -185,21 +186,33 @@ export const fetchArticleSections = async () => {
 const checkIfArticleExists = async (slugifiedtitle) => {
   const sectionsRef = ref(db, `searchIndex/${slugifiedtitle}`);
   const sectionsSnapshot = await get(sectionsRef);
-  if (sectionsSnapshot.exists()) return true;
+  console.log(sectionsSnapshot.exists());
+  if (sectionsSnapshot.exists()) {
+    return true;
+  }
+
   return false;
 };
-const updateArticle = async (oldDetails, updatedData, newSlugifiedtitle) => {
+const updateArticle = async (
+  oldDetails,
+  updatedData,
+  newSlugifiedtitle,
+  articleMetaData
+) => {
   const updates = {};
+
   Object.keys(oldDetails).forEach((pararm) => {
+    console.log(oldDetails[pararm] == updatedData[pararm]);
     if (
       oldDetails.hasOwnProperty(pararm) &&
-      oldDetails[pararm] !== updatedData[pararm]
+      oldDetails[pararm] != updatedData[pararm]
     ) {
-      updates[`/articles/${oldDetails.uid}/${oldDetails.key}/${pararm}`] =
+      updates[`/articles/${oldDetails.uid}/${oldDetails.blogid}/${pararm}`] =
         updatedData[pararm];
+      console.log("change is" + updatedData[pararm]);
     }
   });
-
+  console.log(updates);
   if (oldDetails.title !== updatedData.title) {
     await remove(
       ref(db, "searchIndex/" + slugify(oldDetails.title, { lower: false }))
@@ -208,12 +221,13 @@ const updateArticle = async (oldDetails, updatedData, newSlugifiedtitle) => {
   }
   if (oldDetails.section !== updatedData.section) {
     await remove(
-      ref(db, `artcleSectionsGroup/${oldDetails.section}/${oldDetails.key}`)
+      ref(db, `artcleSectionsGroup/${oldDetails.section}/${oldDetails.blogid}`)
     );
-    updates[`artcleSectionsGroup/${updatedData.section}/${oldDetails.key}`];
+    updates[`artcleSectionsGroup/${updatedData.section}/${oldDetails.blogid}`] =
+      articleMetaData;
   }
   console.log(updates);
-  //  await update(ref(db), updates);
+  await update(ref(db), updates);
   return { status: 200, message: "Updated Successfully" };
 };
 export const Publisharticle1 = async (
@@ -237,51 +251,57 @@ export const Publisharticle1 = async (
       if (!user) {
         resolve(new Response("Forbidden", 401, "add"));
       }
-      let key = "";
+      let blogid = "";
       let Inputdata = {
         date: getCurrentDateTime().date,
         time: getCurrentDateTime().time,
         title: title,
         desc: desc,
         imglink: imglink,
-        key: key,
+        blogid: blogid,
         uid: user.uid,
         section: section,
       };
       const newSlugifiedtitle = slugify(title, { lower: false });
 
-      if (!oldDetails.hasOwnProperty("key")) {
-        key = push(child(ref(db), "/articles/")).key;
-        Inputdata.key = key;
+      const currentDate = new Date();
+      const timestampInSeconds = Math.floor(currentDate.getTime() / 1000);
+      const articleMetaData = {
+        uid: user.uid,
+        time: timestampInSeconds,
+      };
+      if (!oldDetails.hasOwnProperty("blogid")) {
+        blogid = push(child(ref(db), "/articles/")).key;
+        Inputdata.blogid = blogid;
+        articleMetaData.blogid = blogid;
       } else {
-        Inputdata["key"] = oldDetails.key;
+        Inputdata["blogid"] = oldDetails.blogid;
+        articleMetaData.blogid = oldDetails.blogid;
         const result = await updateArticle(
           oldDetails,
           Inputdata,
-          newSlugifiedtitle
+          newSlugifiedtitle,
+          articleMetaData
         );
 
-        resolve(new Response("Updated Successfully", 200, "update", Inputdata));
+        return resolve(
+          new Response("Updated Successfully", 200, "update", Inputdata)
+        );
       }
-      if (checkIfArticleExists(newSlugifiedtitle)) {
-        resolve(new Response("Title already Exists", 403, "add"));
+      if (await checkIfArticleExists(newSlugifiedtitle)) {
+        return resolve(new Response("Title already Exists", 403, "add"));
       }
       const searchIndexUpdates = {};
-      const currentDate = new Date();
-      const timestampInSeconds = Math.floor(currentDate.getTime() / 1000);
-      searchIndexUpdates[`/articles/${user.uid}/${Inputdata.key}`] = Inputdata;
-      const articleMetaData = {
-        uid: user.uid,
-        blogid: key,
-        time: timestampInSeconds,
-      };
+
+      searchIndexUpdates[`/articles/${user.uid}/${Inputdata.blogid}`] =
+        Inputdata;
       searchIndexUpdates[
-        `/artcleSectionsGroup/${Inputdata.section}/${Inputdata.key}`
+        `/artcleSectionsGroup/${Inputdata.section}/${Inputdata.blogid}`
       ] = articleMetaData;
       searchIndexUpdates[`/searchIndex/${newSlugifiedtitle}`] = articleMetaData;
       console.log(searchIndexUpdates);
-      //  await update(ref(db), searchIndexUpdates);
-      resolve(resolve(new Response("Added Successfully", 200, "add")));
+      await update(ref(db), searchIndexUpdates);
+      return resolve(new Response("Added Successfully", 200, "add"));
     } catch (error) {
       console.error("Error adding/updating data: ", error.message);
       if (error.code === "PERMISSION_DENIED") {

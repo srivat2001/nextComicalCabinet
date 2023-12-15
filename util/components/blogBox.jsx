@@ -42,7 +42,7 @@ export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
                 <button
                   onClick={(e) =>
                     deleteArticleAsync(
-                      data.key,
+                      data.blogid,
                       data.uid,
                       data.title,
                       data.section

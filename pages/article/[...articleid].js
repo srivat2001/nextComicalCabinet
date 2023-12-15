@@ -219,9 +219,9 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
                           oldDetails,
                           user
                         );
-                        console.log(result);
+
                         SetWarning(result.message);
-                        if (result.type == "update" && result.type == 200) {
+                        if (result.type == "update" && result.status == 200) {
                           setOldDetails(result.data);
                         }
                       }}

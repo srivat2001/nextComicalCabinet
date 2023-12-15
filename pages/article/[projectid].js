@@ -10,8 +10,6 @@ import Disclaimer from "../../util/components/footer";
 import NoIntenet from "../../util/components/internetNotFound";
 import Head from "next/head";
 
-import { db } from "../../util/js/firebaseconn";
-
 function portfolioProject({ isOnline, routerloaded, articleData }) {
   const router = useRouter();
   const [load, loaded] = useState(false);

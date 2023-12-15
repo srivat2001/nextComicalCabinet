@@ -21,25 +21,27 @@ export default function Section({ isOnline, routerloaded }) {
   const [type, setType] = useState("");
 
   const addmore = async () => {
-    try {
-      console.log();
-      const val = await getArticleByScroll(
-        [],
-        FirstTime,
-        nextKey,
-        `artcleSectionsGroup/${type}`
-      );
-      let rvarr = val.articles;
-      setNextKey(val.lowestTimestampKey.time);
-      console.log(val);
-      setFirstTime(false);
-      setAlist((alist) => [...alist, ...rvarr]);
-      setAddMore(true);
-      setActionMessage("Loaded Successfully");
-    } catch (error) {
-      if (error.statusCode === 404) {
-        setActionMessage(error.error);
-        setAddMore(false);
+    if (type) {
+      try {
+        const val = await getArticleByScroll(
+          [],
+          FirstTime,
+          nextKey,
+          `artcleSectionsGroup/${type}`
+        );
+
+        let rvarr = val.articles;
+        setNextKey(val.lowestTimestampKey.time);
+        console.log(val);
+        setFirstTime(false);
+        setAlist((alist) => [...alist, ...rvarr]);
+        setAddMore(true);
+        setActionMessage("Loaded Successfully");
+      } catch (error) {
+        if (error.statusCode === 404) {
+          setActionMessage(error.error);
+          setAddMore(false);
+        }
       }
     }
   };
@@ -48,6 +50,11 @@ export default function Section({ isOnline, routerloaded }) {
     setReload((reload) => !reload);
   };
   useEffect(() => {
+    console.log("route changed");
+    //   setAlist([]);
+  }, [router]);
+
+  useEffect(() => {
     if (!isOnline) {
       setActionMessage("You are offline");
       return () => {};
@@ -55,6 +62,8 @@ export default function Section({ isOnline, routerloaded }) {
     if (router.query.type) {
       setType(router.query.type);
     }
+    setAlist([]);
+
     auth.onAuthStateChanged((user) => {
       LoggedInInfo(user)
         .then((result) => {
@@ -75,12 +84,11 @@ export default function Section({ isOnline, routerloaded }) {
     setActionMessage("loading");
     setNextKey(0);
     setAddMore(false);
-    setAlist([]);
     setLoded(false);
     addmore();
 
     EffectRan.current = false;
-  }, [type, reload, router, isOnline]);
+  }, [type, reload, isOnline, router]);
 
   return (
     <div>
