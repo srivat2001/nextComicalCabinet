@@ -214,10 +214,13 @@ const updateArticle = async (
   });
   console.log(updates);
   if (oldDetails.title !== updatedData.title) {
+    if (await checkIfArticleExists(newSlugifiedtitle)) {
+      return { status: 401, message: "Title Already exists" };
+    }
     await remove(
       ref(db, "searchIndex/" + slugify(oldDetails.title, { lower: false }))
     );
-    updates["searchIndex/" + newSlugifiedtitle];
+    updates["searchIndex/" + newSlugifiedtitle] = articleMetaData;
   }
   if (oldDetails.section !== updatedData.section) {
     await remove(
@@ -285,7 +288,10 @@ export const Publisharticle1 = async (
         );
 
         return resolve(
-          new Response("Updated Successfully", 200, "update", Inputdata)
+          new Response(result.message, result.status, "update", {
+            updateddata: Inputdata,
+            updatedtitle: newSlugifiedtitle,
+          })
         );
       }
       if (await checkIfArticleExists(newSlugifiedtitle)) {

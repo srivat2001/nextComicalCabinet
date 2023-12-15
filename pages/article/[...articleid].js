@@ -7,6 +7,7 @@ import {
   LoggedInInfo,
   fetchArticleSections,
 } from "../../util/js/articleDB";
+import { redirect } from "next/navigation";
 import { useRouter } from "next/router";
 const useAutosizeInput = (remainwords) => {
   const [value, setValue] = useState("");
@@ -222,7 +223,8 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
 
                         SetWarning(result.message);
                         if (result.type == "update" && result.status == 200) {
-                          setOldDetails(result.data);
+                          setOldDetails(result.data.updateddata);
+                          router.push("/article/" + result.data.updatedtitle);
                         }
                       }}
                     >
