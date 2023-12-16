@@ -60,6 +60,13 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
         <meta property="og:image:width" content="630" />
         <meta property="og:image:height" content="473" />
       </Head>
+      <img
+        title="Diamond Hub Surat Aims To Outshine World As Largest Office Opens Tomorrow"
+        alt="Diamond Hub Surat Aims To Outshine World As Largest Office Opens Tomorrow"
+        id="story_image_main"
+        src="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg"
+        pinger-seen="true"
+      />
       <div className="article-page">
         {/* <Breadcomb paths={breadcrumbPaths} /> */}
         {load ? (
