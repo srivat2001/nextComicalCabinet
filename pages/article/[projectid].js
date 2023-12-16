@@ -59,33 +59,17 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
         <meta property="og:title" content={articleData.title} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta
-          name="twitter:image"
-          content="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg?ver-20231203.06"
-        ></meta>
+        <meta name="twitter:image" content={articleData.imglink}></meta>
         <meta name="twitter:title" content={articleData.title} />
         <meta
           name="twitter:description"
           content={articleData.desc.split(".")[0]}
         />
-        <meta
-          name="twitter:image"
-          content="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg?ver-20231203.06"
-        />
+        <meta name="twitter:image" content={articleData.imglink} />
         <meta name="twitter:card" content="summary_large_image" />
-        <link
-          rel="preload"
-          as="image"
-          href="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg"
-        ></link>
+        <link rel="preload" as="image" content={articleData.imglink}></link>
       </Head>
-      <img
-        title="Diamond Hub Surat Aims To Outshine World As Largest Office Opens Tomorrow"
-        alt="Diamond Hub Surat Aims To Outshine World As Largest Office Opens Tomorrow"
-        id="story_image_main"
-        src="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg"
-        pinger-seen="true"
-      />
+
       <div className="article-page">
         {/* <Breadcomb paths={breadcrumbPaths} /> */}
         {load ? (

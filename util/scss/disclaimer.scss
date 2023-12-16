@@ -1,14 +1,16 @@
 @import "responsive";
 .disclaimer {
   margin-left: 20px;
-  margin-right: 20px;
-  padding: 0px;
-  padding-top: 10px;
+  margin-right: 10px;
   border-top: 1px solid white;
   background: transparent;
-  color: black;
   margin-top: 91px;
   line-height: 1.5;
+  background: black;
+  color: white;
+  padding: 1rem;
+  font-weight: 100;
+  font-family: "Kavinlight";
   @include respond-to("small") {
     margin: 0;
   }

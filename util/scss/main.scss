@@ -5,6 +5,8 @@ body {
   color: black;
   overflow-x: hidden;
   position: relative;
+  width: fit-content;
+
   @include respond-to("mobile") {
     background-color: white;
     color: black;
@@ -55,8 +57,12 @@ button {
   }
 }
 @font-face {
-  font-family: "myFirstFont";
+  font-family: "Kavinnormal";
   src: url("../fonts/Kanit-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Kavinlight";
+  src: url("../fonts/Kanit-Light.ttf") format("truetype");
 }
 .mainloadingScreen {
   margin-left: 10px;
@@ -88,7 +94,7 @@ button {
 }
 
 .App {
-  font-family: "myFirstFont";
+  font-family: "Kavinnormal";
   position: relative;
   font-size: 600;
   margin: 2rem;
