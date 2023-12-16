@@ -63,6 +63,16 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
           name="twitter:image"
           content="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg?ver-20231203.06"
         ></meta>
+        <meta name="twitter:title" content={articleData.title} />
+        <meta
+          name="twitter:description"
+          content={articleData.desc.split(".")[0]}
+        />
+        <meta
+          name="twitter:image"
+          content="https://c.ndtvimg.com/2023-12/76qv9dt4_surat-diamond-burse_625x300_16_December_23.jpeg?ver-20231203.06"
+        />
+        <meta name="twitter:card" content="summary_large_image" />
         <link
           rel="preload"
           as="image"
