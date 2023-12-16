@@ -49,10 +49,7 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
           crossorigin="anonymous"
         ></script>
 
-        <meta
-          property="og:description"
-          content={articleData.desc.split(".")[0]}
-        />
+        <meta name="description" content={articleData.desc.split(".")[0]} />
         <meta property="og:title" content={articleData.title} />
         <meta
           property="og:description"
