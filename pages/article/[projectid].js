@@ -49,11 +49,19 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
           crossorigin="anonymous"
         ></script>
 
-        <meta name="description" content={articleData.desc} />
+        <meta
+          property="og:description"
+          content={articleData.desc.split(".")[0]}
+        />
         <meta property="og:title" content={articleData.title} />
-        <meta property="og:description" content={articleData.desc} />
+        <meta
+          property="og:description"
+          content={articleData.desc.split(".")[0]}
+        />
         <meta property="og:image" content={articleData.imglink} />
         <meta property="og:title" content={articleData.title} />
+        <meta property="og:image:width" content="630" />
+        <meta property="og:image:height" content="473" />
       </Head>
       <div className="article-page">
         {/* <Breadcomb paths={breadcrumbPaths} /> */}
