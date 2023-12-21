@@ -4,9 +4,9 @@ export default function validateInputs(title, imglink, para, section) {
     validationProblems.push("Title should be between 20 and 180 characters.");
   }
 
-  if (!/^https?:\/\/.*\.(jpe?g|png)(\?.*)?$/i.test(imglink)) {
-    validationProblems.push("Image link is not valid.");
-  }
+  // if (!/^https?:\/\/.*\.(jpe?g|png)(\?.*)?$/i.test(imglink)) {
+  //   validationProblems.push("Image link is not valid.");
+  // }
 
   const wordsCount = para.trim().split(/\s+/).length;
 

@@ -14,12 +14,22 @@ import {
   update,
 } from "firebase/database";
 import { db, app } from "./firebaseconn";
+import {
+  getStorage,
+  ref as ref1,
+  uploadBytes,
+  getDownloadURL,
+  getMetadata,
+  getBlob,
+  deleteObject,
+} from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { getCurrentDateTime } from "./currentTime";
 import Response from "./response";
 import slugify from "slugify";
 import validateInputs from "./validation";
 import { CustomError } from "../errors/CustomError";
+import { resolve } from "styled-jsx/css";
 export const searcharticle = async (term) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -193,41 +203,115 @@ const checkIfArticleExists = async (slugifiedtitle) => {
 
   return false;
 };
+
+function createTimestamp(dateString, timeString) {
+  const [day, month, year] = dateString.split("/");
+  const [hours, minutes, seconds] = timeString.split(":");
+  const timestamp = new Date(
+    `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`
+  );
+  const timestampInSeconds = Math.floor(timestamp.getTime() / 1000);
+  return timestampInSeconds;
+}
+export const getImageLink = (uid, blogid, GetBlob = false) => {
+  return new Promise(async (resolve, reject) => {
+    const storage = getStorage();
+    getDownloadURL(ref1(storage, `images/imgid${uid}${blogid}`))
+      .then(async (url) => {
+        const response = {};
+        response.url = url;
+        if (GetBlob) {
+          response.blob = await getBlob(
+            ref1(storage, `images/imgid${uid}${blogid}`)
+          );
+        }
+
+        return resolve(response);
+      })
+      .catch(() => {
+        return reject({ status: 404, message: "Doenst Exists" });
+      });
+  });
+};
+
+const uploadFile = (uid, blogid, file) => {
+  return new Promise(async (resolve, reject) => {
+    const storage = getStorage();
+    const randomId = Math.random().toString(36).substring(7);
+    const storageRef = ref1(storage, `images/imgid${uid}${blogid}`);
+
+    const metadata = {
+      contentType: file.type,
+      customMetadata: {
+        id: randomId,
+      },
+    };
+    try {
+      // Validate if a file is provided
+      if (!file) {
+        throw new Error("No file provided.");
+      }
+
+      //  Check if the file already exists (getMetadata will reject if not found)
+      await getMetadata(storageRef);
+      await deleteObject(storageRef);
+      await uploadBytes(storageRef, file, metadata);
+      const data = await getImageLink(uid, blogid, false);
+
+      resolve({ url: data.url });
+    } catch (error) {
+      await uploadBytes(storageRef, file, metadata);
+      const data = await getImageLink(uid, blogid, false);
+      resolve({ url: data.url });
+    }
+  });
+};
+
 const updateArticle = async (
   oldDetails,
   updatedData,
   newSlugifiedtitle,
-  articleMetaData
+  articleMetaDat,
+  newfile
 ) => {
   const updates = {};
-
+  const result = await uploadFile(oldDetails.uid, oldDetails.blogid, newfile);
+  updatedData.imglink = result.url;
+  const timestampinseconds = createTimestamp(oldDetails.date, oldDetails.time);
+  const articleMetaData = {
+    uid: oldDetails.uid,
+    time: timestampinseconds,
+    blogid: oldDetails.blogid,
+  };
   Object.keys(oldDetails).forEach((pararm) => {
-    console.log(oldDetails[pararm] == updatedData[pararm]);
     if (
       oldDetails.hasOwnProperty(pararm) &&
       oldDetails[pararm] != updatedData[pararm]
     ) {
       updates[`/articles/${oldDetails.uid}/${oldDetails.blogid}/${pararm}`] =
         updatedData[pararm];
-      console.log("change is" + updatedData[pararm]);
     }
   });
-  console.log(updates);
+
+  const articleSectionRef = ref(
+    db,
+    `artcleSectionsGroup/${oldDetails.section}/${oldDetails.blogid}`
+  );
   if (oldDetails.title !== updatedData.title) {
+    console.log("updated");
     if (await checkIfArticleExists(newSlugifiedtitle)) {
       return { status: 401, message: "Title Already exists" };
     }
+
     await remove(
       ref(db, "searchIndex/" + slugify(oldDetails.title, { lower: false }))
     );
     updates["searchIndex/" + newSlugifiedtitle] = articleMetaData;
   }
   if (oldDetails.section !== updatedData.section) {
-    await remove(
-      ref(db, `artcleSectionsGroup/${oldDetails.section}/${oldDetails.blogid}`)
-    );
     updates[`artcleSectionsGroup/${updatedData.section}/${oldDetails.blogid}`] =
       articleMetaData;
+    await remove(articleSectionRef);
   }
   console.log(updates);
   await update(ref(db), updates);
@@ -239,18 +323,19 @@ export const Publisharticle1 = async (
   imglink,
   articleID,
   section,
-  oldDetails
+  oldDetails,
+  user,
+  file
 ) => {
   return new Promise(async (resolve, reject) => {
     const validationProblems = validateInputs(title, imglink, desc, section);
-
     if (validationProblems.length !== 0) {
       resolve(new Response(validationProblems.join(" "), 401, "add"));
     }
     try {
       const auth = getAuth(app);
       const user = auth.currentUser;
-      console.log(user);
+
       if (!user) {
         resolve(new Response("Forbidden", 401, "add"));
       }
@@ -284,7 +369,8 @@ export const Publisharticle1 = async (
           oldDetails,
           Inputdata,
           newSlugifiedtitle,
-          articleMetaData
+          articleMetaData,
+          file
         );
 
         return resolve(
@@ -298,7 +384,13 @@ export const Publisharticle1 = async (
         return resolve(new Response("Title already Exists", 403, "add"));
       }
       const searchIndexUpdates = {};
-
+      const uploadedImage = await uploadFile(
+        Inputdata.uid,
+        Inputdata.blogid,
+        file
+      );
+      Inputdata.imglink = uploadedImage.url;
+      console.log(Inputdata.imglink);
       searchIndexUpdates[`/articles/${user.uid}/${Inputdata.blogid}`] =
         Inputdata;
       searchIndexUpdates[
@@ -307,7 +399,11 @@ export const Publisharticle1 = async (
       searchIndexUpdates[`/searchIndex/${newSlugifiedtitle}`] = articleMetaData;
       console.log(searchIndexUpdates);
       await update(ref(db), searchIndexUpdates);
-      return resolve(new Response("Added Successfully", 200, "add"));
+      return resolve(
+        new Response("Added Successfully", 200, "add", {
+          title: newSlugifiedtitle,
+        })
+      );
     } catch (error) {
       console.error("Error adding/updating data: ", error.message);
       if (error.code === "PERMISSION_DENIED") {

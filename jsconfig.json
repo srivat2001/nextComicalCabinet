@@ -1,0 +1,11 @@
+// jsconfig.json or tsconfig.json
+
+// jsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@scripts/*": ["./util/js/*"]
+    }
+  }
+}

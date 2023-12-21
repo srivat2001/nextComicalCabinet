@@ -6,42 +6,37 @@ import {
   Publisharticle1,
   LoggedInInfo,
   fetchArticleSections,
+  getImageLink,
 } from "../../util/js/articleDB";
+import { getBlob } from "firebase/storage";
 import { redirect } from "next/navigation";
 import { useRouter } from "next/router";
-const useAutosizeInput = (remainwords) => {
-  const [value, setValue] = useState("");
-  const [remainingChars, setRemainingChars] = useState(remainwords);
-  const [isLowRemainingChars, setIsLowRemainingChars] = useState(false);
-  const inputRef = useRef(null);
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = "0px";
-      const scrollHeight = inputRef.current.scrollHeight;
-      inputRef.current.style.height = scrollHeight + "px";
-    }
-  }, [value]);
+const useAutosizeInput = (limit) => {
+  const [remainingChars, setRemainingChars] = useState(20);
+  const [limitref, setLimit] = useState(limit);
+  const [value, setValue] = useState("f");
+  const setReplicatedValue = (textareaRef) => {
+    if (textareaRef.current && textareaRef.current.parentNode) {
+      const currentValue = textareaRef.current.value;
+      const truncatedValue = currentValue.slice(0, limit);
+      setValue(truncatedValue);
+      setRemainingChars(limitref - truncatedValue.length);
+      textareaRef.current.parentNode.dataset.replicatedValue =
+        truncatedValue + " ";
 
-  const handleInputChange = (e) => {
-    const updatedValue = e;
-    setIsLowRemainingChars(remainingChars <= 0.1 * 50);
-    const charsLeft = remainwords - updatedValue.length;
-
-    if (charsLeft >= 0) {
-      setValue(updatedValue);
-      setRemainingChars(charsLeft);
-    } else {
-      setValue(updatedValue.slice(0, remainwords));
-      setRemainingChars(0);
+      // If the user exceeds the limit, prevent further input
+      if (currentValue.length >= limit) {
+        textareaRef.current.value = truncatedValue;
+        setValue(truncatedValue);
+      }
     }
   };
 
   return {
-    value,
     remainingChars,
-    inputRef,
-    isLowRemainingChars,
-    handleInputChange,
+    setReplicatedValue,
+    limitref,
+    value,
   };
 };
 async function loadArticles(paramValue, uid) {
@@ -49,34 +44,54 @@ async function loadArticles(paramValue, uid) {
 }
 function PublishArticle({ isOnline, routerloaded, articleData }) {
   const router = useRouter();
-  const [found, Setfound] = useState(0);
   const [admin, setAdmin] = useState(false);
+  const [found, Setfound] = useState();
   const [load, setLoad] = useState(0);
   const [articleID, setArticleID] = useState("");
   const [oldDetails, setOldDetails] = useState({});
-  const titleInput = useAutosizeInput(120, true);
-  const Imglink = useAutosizeInput(3000, false);
-  const Para = useAutosizeInput(80000, false);
+  const titleInput = useAutosizeInput(120);
+  const Imglink = useAutosizeInput(3000);
+  const Para = useAutosizeInput(80000);
   const [user, setuser] = useState({});
   const [section, setSection] = useState();
   const [SectionList, setSectionList] = useState([]);
   const [type, setType] = useState("Add");
-  const loadArticlesIfexists = (uid, articleid = null) => {
-    console.log(uid, articleid, type);
+  const [file, setFile] = useState();
+  const [setImg, setImgLink] = useState();
+  const ParaRef = useRef(null);
+  const TitleRef = useRef(null);
 
+  const ImageRef = useRef(null);
+  const TrggerChange = (ReFTextarea, value) => {
+    ReFTextarea.current.value = value;
+    ReFTextarea.current.dispatchEvent(new Event("input", { bubbles: true }));
+  };
+
+  const BlogTOLocalUrl = (blob) => {
+    return URL.createObjectURL(blob);
+  };
+
+  useEffect(() => {
+    if (load == 1) {
+      TrggerChange(TitleRef, "");
+    }
+    if (load == 1 && admin == 1 && Object.keys(oldDetails).length > 0) {
+      TrggerChange(TitleRef, oldDetails.title);
+      TrggerChange(ParaRef, oldDetails.desc);
+      setImgLink(oldDetails.imglink);
+    }
+  }, [oldDetails, load, admin]);
+  const loadArticlesIfexists = (uid, articleid = null) => {
     loadArticles(articleid).then((details) => {
       if (details) {
         setOldDetails(details);
-        titleInput.handleInputChange(details.title);
-        Imglink.handleInputChange(details.imglink);
-        Para.handleInputChange(details.desc);
         setSection(details.section);
         Setfound(1);
+        setLoad(1);
       } else {
+        setLoad(1);
         Setfound(0);
       }
-
-      setLoad(1);
     });
   };
   const fetchSection = async () => {
@@ -132,115 +147,117 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
 
   return (
     <div>
-      <div
-        className={!load || !routerloaded ? "App  mainloadingScreen" : "App"}
-      >
-        <Heading loaded={load} />
-        <div className="publish-page">
-          {load ? (
+      <div>
+        <div
+          className={!load || !routerloaded ? "App  mainloadingScreen" : "App"}
+        >
+          <Heading loaded={load} />
+
+          <div className="publish-page">
             <div className={1 ? "edit-content" : "edit-content blur-bg"}>
               <div className="heading">
                 {type === "edit" ? "Edit" : "Add"} Article
               </div>
-              {load ? (
-                (found || type == "add" || type == "edit") && admin == true ? (
-                  <div>
-                    <label className="textarea-label">Enter Your Title</label>
+
+              {load && admin ? (
+                <div>
+                  <div>Title</div>
+                  <div className="grow-wrap">
                     <textarea
-                      ref={titleInput.inputRef}
+                      name="text"
+                      id="text"
+                      ref={TitleRef}
                       value={titleInput.value}
-                      className={"addArticle"}
-                      onChange={(e) =>
-                        titleInput.handleInputChange(e.target.value)
-                      }
-                      contentEditable={true}
-                    >
-                      dfdf
-                    </textarea>
-                    <div
-                      className={
-                        titleInput.isLowRemainingChars
-                          ? "Alert Character red-characters"
-                          : "Alert Character"
-                      }
-                    >
-                      No of Characters Left: {titleInput.remainingChars}
-                    </div>
-
-                    <label className="textarea-label">Img Link</label>
-
-                    <textarea
-                      ref={Imglink.inputRef}
-                      value={Imglink.value}
-                      className="addArticle"
-                      onChange={(e) =>
-                        Imglink.handleInputChange(e.target.value)
-                      }
-                      contentEditable={true}
-                    />
-                    <img className="edit-img" src={Imglink.value} />
-                    <div className="Alert Character">
-                      No of Characters Left: {Imglink.remainingChars}
-                    </div>
-
-                    <label className="textarea-label">Paragraph</label>
-                    <textarea
-                      ref={Para.inputRef}
-                      value={Para.value}
-                      className="addArticle"
-                      onChange={(e) => Para.handleInputChange(e.target.value)}
-                      contentEditable={true}
-                    />
-                    <div className="Alert Character">
-                      No of Characters Left: {Para.remainingChars}
-                    </div>
-                    <select
-                      onChange={(e) => setSection(e.target.value)}
-                      className="addArticle"
-                      id="articleSection"
-                      value={section}
-                    >
-                      {SectionList.map((section, index) => (
-                        <option key={index} value={section}>
-                          {section}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="warning">{warning}</div>
-                    <button
-                      disabled={!admin}
-                      onClick={async (e) => {
-                        const result = await Publisharticle1(
-                          titleInput.value,
-                          Para.value,
-                          Imglink.value,
-                          articleID,
-                          section,
-                          oldDetails,
-                          user
-                        );
-
-                        SetWarning(result.message);
-                        if (result.type == "update" && result.status == 200) {
-                          setOldDetails(result.data.updateddata);
-                          router.push("/article/" + result.data.updatedtitle);
-                        }
-                      }}
-                    >
-                      Publish
-                    </button>
+                      onInput={() => titleInput.setReplicatedValue(TitleRef)}
+                    ></textarea>
                   </div>
-                ) : type == "add" && admin == false ? (
-                  <div>You are not admin</div>
-                ) : type == "edit" && admin == true && !found ? (
-                  <div>Not found, and the user is not an admin</div>
-                ) : null
+                  <div className="Alert Character">
+                    No of Characters Left: {titleInput.remainingChars}
+                  </div>
+                  <div>Img Src</div>
+                  <img className="edit-img" src={setImg} />
+                  <div className="grow-wrap">
+                    <textarea
+                      name="text"
+                      id="text"
+                      ref={ImageRef}
+                      visibility="hidden"
+                      onInput={() => Imglink.setReplicatedValue(ImageRef)}
+                    ></textarea>
+
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        setFile(e.target.files[0]);
+                        setImgLink(BlogTOLocalUrl(e.target.files[0]));
+                      }}
+                    />
+                  </div>
+                  <div className="Alert Character">
+                    No of Characters Left: {Imglink.remainingChars}
+                  </div>
+                  <div>Paragraph</div>
+                  <div className="grow-wrap">
+                    <textarea
+                      name="text"
+                      id="text"
+                      ref={ParaRef}
+                      onInput={() => Para.setReplicatedValue(ParaRef)}
+                    ></textarea>
+                  </div>
+                  <div className="Alert Character">
+                    No of Characters Left: {Para.remainingChars}
+                  </div>
+                  <select
+                    onChange={(e) => setSection(e.target.value)}
+                    className="addArticle"
+                    id="articleSection"
+                    value={section}
+                  >
+                    {SectionList.map((section, index) => (
+                      <option key={index} value={section}>
+                        {section}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="warning">{warning}</div>
+                  <button
+                    disabled={!admin}
+                    onClick={async (e) => {
+                      const result = await Publisharticle1(
+                        titleInput.value,
+                        Para.value,
+                        Imglink.value,
+                        articleID,
+                        section,
+                        oldDetails,
+                        user,
+                        file
+                      );
+
+                      SetWarning(result.message);
+                      if (result.type == "update" && result.status == 200) {
+                        //   setOldDetails(result.data.updateddata);
+                        //    router.push("/article/" + result.data.updatedtitle);
+                      }
+                      if (result.type == "add" && result.status == 200) {
+                        router.push("/article/" + result.data.title);
+                      }
+                    }}
+                  >
+                    Publish
+                  </button>
+                </div>
               ) : (
-                <div>loading</div>
+                <div>
+                  <div>
+                    {load && admin == 0 ? <div>You are not admin</div> : null}
+                  </div>
+                  <div>{load == 0 ? <div>Loading </div> : null}</div>
+                </div>
               )}
             </div>
-          ) : null}
+          </div>
         </div>
       </div>
     </div>
