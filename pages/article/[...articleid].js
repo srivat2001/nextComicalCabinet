@@ -224,6 +224,24 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
                   <button
                     disabled={!admin}
                     onClick={async (e) => {
+                      // const formData = new FormData();
+                      // formData.append("title", titleInput.value);
+                      // formData.append("desc", Para.value);
+                      // formData.append("imglink", Imglink.value);
+                      // formData.append("articleID", articleID); // Assuming articleID is a variable
+                      // formData.append("section", section); // Assuming section is a variable
+                      // formData.append(
+                      //   "oldDetailsJSON",
+                      //   JSON.stringify(oldDetails)
+                      // ); // Assuming oldDetails is an object
+                      // formData.append("userJSON", JSON.stringify(user)); // Assuming user is an object
+                      // formData.append("file", file);
+                      // const result1 = await fetch("/api/article/add", {
+                      //   method: "POST",
+                      //   body: formData,
+                      // });
+                      // console.log(await result1.json());
+                      //  const data = await result.json();
                       const result = await Publisharticle1(
                         titleInput.value,
                         Para.value,
@@ -237,8 +255,8 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
 
                       SetWarning(result.message);
                       if (result.type == "update" && result.status == 200) {
-                        //   setOldDetails(result.data.updateddata);
-                        //    router.push("/article/" + result.data.updatedtitle);
+                        setOldDetails(result.data.updateddata);
+                        router.push("/article/" + result.data.updatedtitle);
                       }
                       if (result.type == "add" && result.status == 200) {
                         router.push("/article/" + result.data.title);

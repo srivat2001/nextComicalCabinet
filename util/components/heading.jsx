@@ -39,7 +39,13 @@ export const Heading = ({ loaded }) => {
   const [sections, setSectionList] = useState([]);
   const fetchSection = async () => {
     try {
-      const sectionsArray = await fetchArticleSections();
+      // = await fetchArticleSections();
+      const result = await fetch("/api/article/sections/get", {
+        method: "GET",
+      });
+      const data = await result.json();
+      const sectionsArray = data.data.sectionArray;
+
       setSectionList(sectionsArray);
     } catch (error) {
       console.error("Error fetching article sections:", error);
@@ -48,29 +54,16 @@ export const Heading = ({ loaded }) => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  // function signin() {
-  //   const auth = getAuth(app);
-  //   const provide = new GoogleAuthProvider();
-  //   signInWithPopup(auth, provide)
-  //     .then((result) => {
-  //       localStorage.setItem("_loggeddata", JSON.stringify(result));
-  //       dispatch({ type: "SET_LOGGED_DATA", payload: result });
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }
+
   function signin() {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Check if the device is a mobile device
-    const isMobileDevice = true; // Adjust the threshold as needed
+    const isMobileDevice = true;
 
     if (1) {
       signInWithRedirect(auth, provider);
     } else {
-      // Desktop device - use signInWithPopup
       signInWithPopup(auth, provider)
         .then((result) => {
           localStorage.setItem("_loggeddata", JSON.stringify(result));
@@ -93,7 +86,6 @@ export const Heading = ({ loaded }) => {
       });
   }
   useEffect(() => {
-    // Mobile device - use getRedirectResult
     fetchSection();
     const auth = getAuth(app);
     console.log(auth.currentUser);

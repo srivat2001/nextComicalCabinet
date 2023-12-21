@@ -13,7 +13,7 @@ import {
   endBefore,
   update,
 } from "firebase/database";
-import { db, app } from "./firebaseconn";
+import { db, app } from "@scripts/firebaseconn";
 import {
   getStorage,
   ref as ref1,
@@ -24,173 +24,19 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { getAuth } from "firebase/auth";
-import { getCurrentDateTime } from "./currentTime";
-import Response from "./response";
+import { getCurrentDateTime } from "@scripts/currentTime";
+import Response from "@scripts/response";
 import slugify from "slugify";
-import validateInputs from "./validation";
-import { CustomError } from "../errors/CustomError";
-import { resolve } from "styled-jsx/css";
-export const searcharticle = async (term) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const searchIndexRef = ref(db, "searchIndex/" + term);
-      const searchIndexSnapshot = await get(searchIndexRef);
+import validateInputs from "@scripts/validation";
+import { CustomError } from "../../../util/errors/CustomError";
+import multer from "multer";
 
-      if (searchIndexSnapshot.exists()) {
-        const searchResult = searchIndexSnapshot.val();
-        const articleRef = ref(
-          db,
-          `articles/${searchResult.uid}/${searchResult.blogid}`
-        );
-        const articleSnapshot = await get(articleRef);
-        if (articleSnapshot.exists()) {
-          const articleData = articleSnapshot.val();
+const upload = multer({ dest: "uploads/" }); // Set the destination folder for uploaded files
 
-          resolve(articleData);
-        } else {
-          resolve(null); // Article not found
-        }
-      } else {
-        resolve(null); // Search term not found in the search index
-      }
-    } catch (error) {
-      console.error("Error searching article:", error);
-      reject("Error searching article");
-    }
-  });
-};
-
-export const deletedata = (id, uid, title, section) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Delete from articles
-      await remove(ref(db, `/articles/${uid}/${id}`));
-
-      // Create slugified title for searchIndex deletion
-      const slugifiedTitle = slugify(title, { lower: false });
-
-      // Delete from searchIndex
-      await remove(ref(db, `/searchIndex/${slugifiedTitle}`));
-
-      // Delete from articleSectionsGroup
-      await remove(ref(db, `/artcleSectionsGroup/${section}/${id}`));
-
-      resolve();
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-export const getArticleByScroll = async (prevArr, first, lastTime, reftype) => {
-  return new Promise(async (resolve, reject) => {
-    let articles = prevArr;
-    let lowestTimestampKey = null;
-    setTimeout(
-      () => reject(new CustomError("ITs taking too long to load", 401)),
-      5000
-    );
-
-    try {
-      if (first) {
-        const searchIndexRef = query(
-          ref(db, reftype),
-          orderByChild("time"),
-          limitToLast(1) // Limit to the last 1
-        );
-
-        const searchIndexSnapshot = await get(searchIndexRef);
-
-        if (!searchIndexSnapshot.exists()) {
-          // Handle the case when no data is available
-          reject({ error: "No Articles Found", statusCode: 404 });
-          return;
-        }
-        const latestSearchIndexItem = Object.values(
-          searchIndexSnapshot.val()
-        )[0];
-        lastTime = latestSearchIndexItem.time;
-      }
-      console.log(lastTime);
-      if (lastTime !== 0) {
-        let searchIndexRef = "";
-        if (first === true) {
-          searchIndexRef = query(
-            ref(db, reftype),
-            orderByChild("time"),
-            endAt(lastTime),
-            limitToLast(3)
-          );
-        } else {
-          searchIndexRef = query(
-            ref(db, reftype),
-            orderByChild("time"),
-            endBefore(lastTime),
-            limitToLast(3)
-          );
-        }
-
-        const searchIndexSnapshot = await get(searchIndexRef);
-
-        if (searchIndexSnapshot.exists()) {
-          const searchIndexData = searchIndexSnapshot.val();
-          const lastKeys = Object.keys(searchIndexData);
-          console.log(searchIndexData, lastKeys);
-          for (const key of lastKeys) {
-            const articleRef = ref(
-              db,
-              `articles/${searchIndexData[key].uid}/${searchIndexData[key].blogid}`
-            );
-            const articleSnapshot = await get(articleRef);
-
-            if (articleSnapshot.exists()) {
-              const articleData = articleSnapshot.val();
-              articles.push(articleData);
-            }
-
-            // Track the lowest timestamp key
-            if (
-              !lowestTimestampKey ||
-              searchIndexData[key].time < lowestTimestampKey.time
-            ) {
-              lowestTimestampKey = searchIndexData[key];
-            }
-          }
-        }
-      }
-      articles = articles;
-
-      if (articles.length === 0) {
-        reject({ error: "No More Articles", statusCode: 404 });
-      }
-      resolve({ articles, lowestTimestampKey });
-    } catch (error) {
-      console.error("Error fetching articles by scroll:", error);
-      reject("Error fetching articles by scroll");
-      reject({ error: "Server Error", statusCode: 201 });
-    }
-  });
-};
-
-export const fetchArticleSections = async () => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const sectionsRef = ref(db, "articleSections");
-      const sectionsSnapshot = await get(sectionsRef);
-
-      if (sectionsSnapshot.exists()) {
-        const sectionsData = sectionsSnapshot.val();
-        const sectionsArray = Object.keys(sectionsData).filter(
-          (section) => sectionsData[section] === true
-        );
-        resolve(sectionsArray);
-      } else {
-        resolve([]); // No sections found
-      }
-    } catch (error) {
-      console.error("Error fetching article sections:", error);
-      reject("Error fetching article sections");
-    }
-  });
+export const config = {
+  api: {
+    bodyParser: false,
+  },
 };
 
 const checkIfArticleExists = async (slugifiedtitle) => {
@@ -213,7 +59,7 @@ function createTimestamp(dateString, timeString) {
   const timestampInSeconds = Math.floor(timestamp.getTime() / 1000);
   return timestampInSeconds;
 }
-export const getImageLink = (uid, blogid, GetBlob = false) => {
+const getImageLink = (uid, blogid, GetBlob = false) => {
   return new Promise(async (resolve, reject) => {
     const storage = getStorage();
     getDownloadURL(ref1(storage, `images/imgid${uid}${blogid}`))
@@ -276,7 +122,9 @@ const updateArticle = async (
 ) => {
   const updates = {};
   const result = await uploadFile(oldDetails.uid, oldDetails.blogid, newfile);
+  console.log(result);
   updatedData.imglink = result.url;
+
   const timestampinseconds = createTimestamp(oldDetails.date, oldDetails.time);
   const articleMetaData = {
     uid: oldDetails.uid,
@@ -314,7 +162,7 @@ const updateArticle = async (
     await remove(articleSectionRef);
   }
   console.log(updates);
-  await update(ref(db), updates);
+  // await update(ref(db), updates);
   return { status: 200, message: "Updated Successfully" };
 };
 export const Publisharticle1 = async (
@@ -333,9 +181,6 @@ export const Publisharticle1 = async (
       resolve(new Response(validationProblems.join(" "), 401, "add"));
     }
     try {
-      const auth = getAuth(app);
-      const user = auth.currentUser;
-
       if (!user) {
         resolve(new Response("Forbidden", 401, "add"));
       }
@@ -414,35 +259,58 @@ export const Publisharticle1 = async (
     }
   });
 };
-
-export const LoggedInInfo = async (user) => {
-  return new Promise((resolve, reject) => {
-    const timeoutDuration = 5000; // Adjust the timeout duration as needed (in milliseconds)
-
-    const timeoutId = setTimeout(() => {
-      reject(new CustomError("Timeout: Auh state change took too long.", 401));
-    }, timeoutDuration);
-    const handleQueryResult = (snapshot) => {
-      clearTimeout(timeoutId); // Clear the timeout since the operation completed successfully
-      const isAdmin = snapshot.exists();
-      resolve({
-        isLoggedIn: true,
-        isAdmin: isAdmin,
+export default async function handler(req, res) {
+  if (req.method === "POST") {
+    try {
+      await new Promise((resolve, reject) => {
+        upload.single("file")(req, res, (err) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve();
+        });
       });
-    };
-    const handleError = (error) => {
-      clearTimeout(timeoutId);
-      reject(error);
-    };
-    if (user) {
-      const query = ref(db, "/admins/" + user.uid);
-      onValue(query, handleQueryResult, handleError);
-    } else {
-      clearTimeout(timeoutId);
-      resolve({
-        isLoggedIn: false,
-        isAdmin: false,
-      });
+
+      const {
+        title,
+        desc,
+        imglink,
+        articleID,
+        section,
+        oldDetailsJSON,
+        userJSON,
+      } = req.body;
+      const user = JSON.parse(userJSON);
+      const oldDetails = JSON.parse(oldDetailsJSON);
+      const file = req.file;
+      console.log(userJSON);
+      const result = await Publisharticle1(
+        title,
+        desc,
+        imglink,
+        articleID,
+        section,
+        oldDetails,
+        user,
+        file
+      );
+
+      res.status(200).json({ message: "Request processed successfully" });
+    } catch (error) {
+      console.error("Error processing request:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-  });
-};
+  } else {
+    res.status(405).json({ error: "Method Not Allowed" });
+  }
+}
+// const result = await Publisharticle1(
+//   title,
+//   desc,
+//   imglink,
+//   articleID,
+//   section,
+//   oldDetails,
+//   user,
+//   file
+// );
