@@ -1,12 +1,15 @@
-import { BlogBox } from "../util/components/blogBox";
-import React, { useEffect, useState, useContext } from "react";
-import Disclaimer from "../util/components/footer";
-import { Heading } from "../util/components/heading";
-import { auth } from "../util/js/firebaseconn";
-import { LoggedInInfo, getArticleByScroll } from "../util/js/articleDB";
-import { useRouter } from "next/router";
+import { BlogBox, Heading, Disclaimer } from "@tcc/Components";
+import React, { useEffect, useState, lazy, Suspense } from "react";
+import { auth } from "@tcc/ArticleManager/Database/Auth";
+import { get } from "@tcc/ArticleManager/Database";
+import { LoggedData } from "@tcc/ArticleManager/Database/Auth";
+import timeAndDateConverter from "@tcc/ArticleManager/timeAndDateConverter";
+import { getSections } from "@tcc/ArticleManager/Database";
+import Link from "next/link";
+const BlogBoxLazy = lazy(() => import("../util/components/blogBox"));
 function Main({ isOnline, routerloaded }) {
   const [alist, setAlist] = useState([]); //ArticleList
+  const [section, SetSections] = useState([]);
   const [admin, isAdmin] = useState(false); //Yes if admin
   const [nextKey, setNextKey] = useState(0); //Next Key of article Which needs to be loaded when clicked on load more
   const [FirstTime, setFirstTime] = useState(true); //true when article loaded fot the firstTime
@@ -14,23 +17,17 @@ function Main({ isOnline, routerloaded }) {
   const [addMore, setAddMore] = useState(false); //true when new articles can be loaded
   const [warningMessage, setwarningMessage] = useState("loading");
   const [online, setOnline] = useState(false);
-
-  //Add article
-
+  const [blogsBySection, setBlogsBySection] = useState({});
+  const [blogsFromAllsections, SetblogsFromAllSections] = useState();
   const addmore = async () => {
     try {
-      const val = await getArticleByScroll(
-        [],
-        FirstTime,
-        nextKey,
-        `searchIndex`
-      );
+      const val = await get([], FirstTime, nextKey, `searchIndex`);
       let rvarr = val.articles;
       setNextKey(val.lowestTimestampKey.time);
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
       setAddMore(true);
-      setActionMessage("Loaded Successfully");
+      setwarningMessage("Loaded Successfully");
     } catch (error) {
       if (error.statusCode === 401) {
         setwarningMessage(error.error);
@@ -40,11 +37,53 @@ function Main({ isOnline, routerloaded }) {
       setAddMore(false);
     }
   };
+  const fetchSection = async () => {
+    try {
+      const sectionsArray = await getSections();
+      return sectionsArray;
+    } catch (error) {
+      console.error("Error fetching article sections:", error);
+    }
+  };
+  const GetArticleOnSection = async (type) => {
+    return await get([], true, 0, `artcleSectionsGroup/${type}`);
+  };
+  const fetchAndSetBlogs = async () => {
+    try {
+      const SectionArr = await fetchSection();
 
-  //alert when deleted
+      for (const secitonInd of SectionArr) {
+        const indvArticle = await GetArticleOnSection(secitonInd);
+        console.log(indvArticle);
+
+        setBlogsBySection((prevBlogs) => ({
+          ...prevBlogs,
+          [secitonInd]: indvArticle.articles,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching and setting blogs:", error);
+    }
+  };
+  useEffect(() => {
+    fetchSection().then((SectionArr) => {
+      SectionArr.forEach((secitonInd) => {
+        GetArticleOnSection(secitonInd).then((indvArticle) => {
+          console.log(indvArticle);
+          setBlogsBySection((prevBlogs) => ({
+            ...prevBlogs,
+            [secitonInd]: indvArticle.articles,
+          }));
+        });
+      });
+    });
+  }, []);
+  useEffect(() => {
+    console.log(blogsBySection);
+  }, [blogsBySection]);
   const deletedAlert = (uid, key) => {
-    alert("deleted");
-    const updatedItems = alist.filter((item) => item.key !== key);
+    alert("Deleted");
+    const updatedItems = alist.filter((item) => item.blog_id !== key);
     setAlist(updatedItems);
   };
 
@@ -63,7 +102,6 @@ function Main({ isOnline, routerloaded }) {
   };
 
   useEffect(() => {
-    console.log(isOnline);
     if (!isOnline) {
       setLoded(false);
       setOnline(false);
@@ -78,7 +116,7 @@ function Main({ isOnline, routerloaded }) {
         addmore().then(() => setLoded(true));
         setOnline(true);
         auth.onAuthStateChanged((user) => {
-          LoggedInInfo(user)
+          LoggedData(user)
             .then((result) => {
               if (result.isAdmin) {
                 isAdmin(true);
@@ -104,9 +142,37 @@ function Main({ isOnline, routerloaded }) {
         className={!routerloaded || !loaded ? "App  mainloadingScreen" : "App"}
       >
         <Heading loaded={loaded} />
-        <div className="top-message ">{isOnline}Whats Cooking? </div>
         <div className="blog-display-container">
           <div className="blog-holder-btn-container">
+            {alist.length > 0 ? (
+              <div className="banner-container">
+                <div className="Banner">
+                  <div className="left">
+                    <div className="figure-wrapper">
+                      <img src={alist[1].imglink}></img>
+                    </div>
+                  </div>
+
+                  <div className="right">
+                    <div className="Section">{alist[0].section}</div>
+                    <div className="title">{alist[0].title}</div>
+                    <div className="desc">
+                      {alist[0].desc.split(" ").length > 15
+                        ? alist[0].desc.split(" ").slice(0, 14).join(" ") +
+                          "..."
+                        : alist[0].desc}
+                    </div>
+
+                    <div className="timedate">
+                      {timeAndDateConverter(alist[0].date, alist[0].time)}
+                    </div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            <h2>Latest Article</h2>
             <div
               className={
                 !loaded ? "blogs-data  loadingScreenBar" : "blogs-data"
@@ -114,9 +180,11 @@ function Main({ isOnline, routerloaded }) {
             >
               {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
               {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
+              {!loaded ? <BlogBox loaded={alist.length == 0}></BlogBox> : null}
+
               {alist.length > 0
                 ? alist.map((article) => (
-                    <BlogBox
+                    <BlogBoxLazy
                       key={article.key}
                       data={article}
                       admin={admin}
@@ -125,6 +193,7 @@ function Main({ isOnline, routerloaded }) {
                     />
                   ))
                 : null}
+
               {online && loaded && alist.length == 0 ? (
                 <div className="warning-message">{warningMessage}</div>
               ) : null}
@@ -132,21 +201,31 @@ function Main({ isOnline, routerloaded }) {
                 <div className="warning-message">{warningMessage}</div>
               ) : null}
             </div>
-            {addMore ? (
-              <div>
-                {" "}
-                <button
-                  onClick={() => {
-                    addmore();
-                  }}
-                >
-                  Load more
-                </button>
-              </div>
-            ) : null}
-            {!addMore && alist.length > 0 ? (
-              <div>No More Article to load</div>
-            ) : null}
+
+            <div>
+              {/* Loop through sections and render blogs */}
+              {Object.keys(blogsBySection).map((section) => (
+                <div>
+                  <h2 className="link">{section}</h2>
+                  <div
+                    key={section}
+                    className={
+                      !loaded ? "blogs-data  loadingScreenBar" : "blogs-data"
+                    }
+                  >
+                    {blogsBySection[section].map((blog, index) => (
+                      <BlogBox
+                        key={blog.blog_id}
+                        data={blog}
+                        admin={admin}
+                        deleteAlert={deletedAlert}
+                        loaded={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

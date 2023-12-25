@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { timeAndDateConverter } from "../../util/js/converter";
+import timeAndDateConverter from "@tcc/ArticleManager/timeAndDateConverter";
 import slugify from "slugify";
-import { Heading } from "../../util/components/heading";
-import { auth } from "../../util/js/firebaseconn";
-import { LoggedInInfo, searcharticle } from "../../util/js/articleDB";
-import Disclaimer from "../../util/components/footer";
-import NoIntenet from "../../util/components/internetNotFound";
+import { Heading, Disclaimer, NoIntenet } from "@tcc/Components";
+import { LoggedData, auth } from "@tcc/ArticleManager/Database/Auth";
+import { search } from "@tcc/ArticleManager/Database";
 import Head from "next/head";
 
 function portfolioProject({ isOnline, routerloaded, articleData }) {
   const router = useRouter();
   const [load, loaded] = useState(false);
   const [admin, isAdmin] = useState(false);
-  console.log(articleData);
+
   if (typeof window !== "undefined") {
     if (!articleData) {
       router.push("404");
     }
   }
+
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
-      LoggedInInfo(user)
+      LoggedData(user)
         .then((result) => {
           if (result.isAdmin) {
             isAdmin(true);
@@ -71,59 +70,64 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
       </Head>
 
       <div className="article-page">
-        {/* <Breadcomb paths={breadcrumbPaths} /> */}
-        {load ? (
-          articleData && Object.keys(articleData).length ? (
-            <div>
-              <div className="heading-main">{articleData.title}</div>
-              <div className="datetime">
-                Upload date:{" "}
-                {timeAndDateConverter(articleData.date, articleData.time)}
+        <div>
+          {/* <Breadcomb paths={breadcrumbPaths} /> */}
+          {load ? (
+            articleData && Object.keys(articleData).length ? (
+              <div className="article-cotainer">
+                <div className="articletop">
+                  <h1 className="section">{articleData.section}</h1>
+                  <div className="heading-main">{articleData.title}</div>
+                  <div className="datetime">
+                    Upload date:{" "}
+                    {timeAndDateConverter(articleData.date, articleData.time)}
+                  </div>
+                  {admin ? (
+                    <Link
+                      href={
+                        "/article/edit/" +
+                        slugify(articleData.title, { lower: false }) +
+                        "?type=edit"
+                      }
+                    >
+                      <button className="editbtn">Edit</button>
+                    </Link>
+                  ) : null}
+                </div>
+                <img src={articleData.imglink} />
+                <h1 className="authorname">By {articleData.displayName}</h1>
+                <div className="article-para">
+                  {articleData.desc
+                    .replace(/\\n/g, "")
+                    .replace(/\\/g, "")
+                    .split("\n")
+                    .map((paragraph, index) => {
+                      if (paragraph.length > 0)
+                        return (
+                          <div>
+                            <p key={index}>{paragraph}</p>
+                          </div>
+                        );
+                    })}
+                </div>
               </div>
-              {admin ? (
-                <Link
-                  href={
-                    "/article/edit/" +
-                    slugify(articleData.title, { lower: false }) +
-                    "?type=edit"
-                  }
-                >
-                  <button className="editbtn">Edit</button>
-                </Link>
-              ) : null}
-              <img src={articleData.imglink} />
-              <div className="article-para">
-                {articleData.desc
-                  .replace(/\\n/g, "")
-                  .replace(/\\/g, "")
-                  .split("\n")
-                  .map((paragraph, index) => {
-                    if (paragraph.length > 0)
-                      return (
-                        <div>
-                          <p key={index}>{paragraph}</p>
-                        </div>
-                      );
-                  })}
-              </div>
-            </div>
+            ) : (
+              <div>Not Found</div>
+            )
           ) : (
-            <div>Not Found</div>
-          )
-        ) : (
-          <div>Loading</div>
-        )}
+            <div>Loading</div>
+          )}
 
-        <Disclaimer></Disclaimer>
+          <Disclaimer></Disclaimer>
+        </div>
       </div>
     </div>
   );
 }
 export default portfolioProject;
 export async function getServerSideProps(context) {
-  const { params } = context;
-  const projectid = params?.projectid;
-  const articleSnapshot = await searcharticle(projectid);
+  const searchT = context.params?.searchTerm;
+  const articleSnapshot = await search(searchT);
   if (articleSnapshot) {
     return {
       props: {

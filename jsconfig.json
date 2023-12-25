@@ -5,7 +5,16 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@scripts/*": ["./util/js/*"]
+      "@scripts/*": ["./util/js/*"],
+      "@tcc/ArticleManager/Database/Auth*": [
+        "./util/js/ArticleManager/Auth/index.js"
+      ],
+      "@tcc/Components*": ["./util/components/index.js"],
+      "@tcc/Components/*": ["./util/components/*"],
+      "@tcc/ArticleManager/Database*": ["./util/js/ArticleManager/index.js"],
+      "@tcc/ArticleManager/*": ["./util/js/ArticleManager/*"],
+
+      "@error/*": ["./util/errors/*"]
     }
   }
 }

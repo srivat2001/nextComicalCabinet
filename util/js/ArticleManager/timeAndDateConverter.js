@@ -1,6 +1,5 @@
-export const timeAndDateConverter = (datePart, timePart) => {
+const timeAndDateConverter = (datePart, timePart) => {
   try {
-    console.log(datePart);
     const [day, month, year] = datePart.split("/").map(Number);
     const [hours, minutes, seconds] = timePart.split(":").map(Number);
 
@@ -23,3 +22,4 @@ export const timeAndDateConverter = (datePart, timePart) => {
     return datePart + timePart;
   }
 };
+export default timeAndDateConverter;

@@ -136,8 +136,14 @@ header {
       min-height: 48px;
       @include respond-to("small") {
         width: 100%;
-        border-radius: 30px;
+
         color: black;
+      }
+      .sidebar-ul {
+        margin-left: auto;
+        @include respond-to("small") {
+          margin-left: 10px;
+        }
       }
       .loader-container {
         width: fit-content;

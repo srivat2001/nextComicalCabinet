@@ -1,4 +1,4 @@
-export default function NoIntenet({ isOnline }) {
+export function NoIntenet({ isOnline }) {
   return (
     <div>
       {typeof window !== "undefined" && !isOnline ? (

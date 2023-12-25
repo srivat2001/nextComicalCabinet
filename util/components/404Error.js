@@ -1,5 +1,7 @@
 import React from "react";
-import { Heading } from "../components/heading";
+
+import { Heading } from "@tcc/Components";
+
 const Custom404 = ({ isOnline }) => {
   return (
     <div>

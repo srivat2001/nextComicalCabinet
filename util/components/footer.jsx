@@ -1,4 +1,4 @@
-const Disclaimer = () => {
+export const Disclaimer = () => {
   return (
     <footer className="disclaimer">
       <p>
@@ -19,5 +19,3 @@ const Disclaimer = () => {
     </footer>
   );
 };
-
-export default Disclaimer;

@@ -1,13 +1,13 @@
 import Link from "next/link";
 import slugify from "slugify";
 import { useRouter } from "next/router";
-import { deletedata } from "../js/articleDB";
-import { useEffect } from "react";
-export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
+import { remove } from "@tcc/ArticleManager/Database";
+
+const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
   // console.log(data);
   const deleteArticleAsync = async (key, uid, title, section) => {
     try {
-      await deletedata(key, uid, title, section);
+      await remove(key, uid, title, section);
       console.log("Deletion successful");
       deleteAlert(uid, key);
     } catch (error) {
@@ -19,11 +19,11 @@ export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
   return (
     <div className={loaded ? "box loadingScreenBar boxloading" : "box"}>
       {data && Object.keys(data).length ? (
-        <div>
+        <div className="img-bloginfo-container">
           <div className="blog_img_cover">
             <img className="blog_img" src={data.imglink} alt="blog_img" />
           </div>
-          <div>
+          <div className="right-side">
             <div className="title">
               <Link href={`/article/${slugify(data.title, { lower: false })}`}>
                 {" "}
@@ -68,3 +68,4 @@ export const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
     </div>
   );
 };
+export default BlogBox;

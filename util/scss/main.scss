@@ -98,13 +98,12 @@ button {
 }
 
 .App {
-  font-family: "Kavinnormal";
+  font-family: "Kavinlight";
   position: relative;
   font-size: 600;
   margin: 2rem;
-  margin-left: 300px;
-  margin-right: 300px;
   margin-top: 0px;
+
   .top-message {
     width: fit-content;
     margin: auto;
@@ -140,21 +139,124 @@ button {
     padding-bottom: 10px;
     min-height: 500px;
     margin: auto;
+    padding-top: 41px;
     .sectioncontainer,
     .blog-holder-btn-container {
       width: fit-content;
       margin: auto;
+      padding: 1rem;
+      margin: 5rem;
+      margin-top: 0rem;
+      @include respond-to("medium") {
+        margin: auto;
+      }
+      @include respond-to("small") {
+        margin: auto;
+      }
+      .banner-container {
+        display: grid;
+        .Banner {
+          display: grid;
+          grid-template-columns: repeat(12, 1fr);
+
+          border: 1px solid #bebebe;
+          background: black;
+          color: white;
+          @include respond-to("medium") {
+            display: block;
+          }
+          @include respond-to("small") {
+            display: block;
+          }
+          .left {
+            grid-column: 1/8;
+            .figure-wrapper {
+              position: relative;
+              margin: 0;
+              padding-top: 56.25%;
+              height: 100%;
+              img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 100%;
+                width: 100%;
+                object-fit: cover;
+                width: 100%;
+                object-fit: cover;
+                max-width: 100%;
+              }
+            }
+          }
+          .right {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--secondary-color);
+            grid-column: 8/13;
+
+            .title {
+              font-size: calc(1vw + 19px);
+              line-height: 40px;
+              font-weight: 600;
+            }
+            .desc {
+              margin-top: 20px;
+              border-top: 1px solid #bbbbbb;
+              padding-top: 10px;
+              font-size: calc(1vw + 1px);
+              line-height: 25px;
+              @include respond-to("medium") {
+                display: block;
+                font-size: calc(1vw + 10px);
+              }
+              @include respond-to("small") {
+                display: block;
+                font-size: calc(1vw + 10px);
+                margin-bottom: 10px;
+              }
+            }
+            .Section {
+              width: fit-content;
+              margin-top: 10px;
+
+              font-size: 15px;
+              margin-top: 13px;
+              padding: 4px 0px;
+            }
+            .timedate {
+              margin-top: auto;
+              @include respond-to("medium") {
+                margin-top: 10px;
+              }
+            }
+          }
+        }
+      }
       .blogs-data {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px;
         background: white;
         justify-content: left;
         padding-top: 20px;
         position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-gap: 24px;
+        gap: 24px;
+        a {
+          text-decoration: none;
+
+          h2 {
+            color: black;
+          }
+        }
         @include respond-to("small") {
-          display: block;
+          grid-template-columns: 1fr;
+          display: grid;
+          grid-row-gap: 10px;
+          padding: 12px 0;
+          height: 100%;
         }
       }
     }

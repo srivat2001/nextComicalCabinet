@@ -4,16 +4,14 @@ import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
-  signInWithCredential,
   signInWithRedirect,
   getRedirectResult,
   signOut,
 } from "firebase/auth";
-import { fetchArticleSections } from "../js/articleDB";
-import { app } from "../js/firebaseconn";
+import { getSections } from "@tcc/ArticleManager/Database";
+import { app } from "@tcc/ArticleManager/Database/Auth";
 import img_logo from "../img/TCB_Banner2.png";
 import Image from "next/image";
-// YourComponent.js
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
@@ -39,13 +37,7 @@ export const Heading = ({ loaded }) => {
   const [sections, setSectionList] = useState([]);
   const fetchSection = async () => {
     try {
-      // = await fetchArticleSections();
-      const result = await fetch("/api/article/sections/get", {
-        method: "GET",
-      });
-      const data = await result.json();
-      const sectionsArray = data.data.sectionArray;
-
+      const sectionsArray = await getSections();
       setSectionList(sectionsArray);
     } catch (error) {
       console.error("Error fetching article sections:", error);
@@ -58,9 +50,6 @@ export const Heading = ({ loaded }) => {
   function signin() {
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-
-    const isMobileDevice = true;
-
     if (1) {
       signInWithRedirect(auth, provider);
     } else {
@@ -88,36 +77,18 @@ export const Heading = ({ loaded }) => {
   useEffect(() => {
     fetchSection();
     const auth = getAuth(app);
-    console.log(auth.currentUser);
     getRedirectResult(auth)
       .then((result) => {
-        console.log(result);
-        // This gives you a Google Access Token. You can use it to access Google APIs.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-
-        const token = credential.accessToken;
-        setLoad(false);
-        // The signed-in user info.
-        const user = result.user;
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
-
-        localStorage.setItem("_loggeddata", JSON.stringify(result));
-        dispatch({ type: "SET_LOGGED_DATA", payload: result });
+        if (result) {
+          localStorage.setItem("_loggeddata", JSON.stringify(result));
+          dispatch({ type: "SET_LOGGED_DATA", payload: result });
+          setLoad(false);
+        }
       })
       .catch((error) => {
         setLoad(false);
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        //  const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
       });
-    console.log(localStorage.getItem("_loggeddata"));
-    if (localStorage.getItem("_loggeddata")) {
+    if (localStorage.getItem("_loggeddata") != null) {
       const parsedData = JSON.parse(localStorage.getItem("_loggeddata"));
       dispatch({ type: "SET_LOGGED_DATA", payload: parsedData });
     }
@@ -185,9 +156,9 @@ export const Heading = ({ loaded }) => {
             ) : null}
           </div>
           <div className="loader-container">
-            {load ? <div class="loader"></div> : null}
+            {!load ? <div class="loader"></div> : null}
           </div>
-          {!load ? (
+          {load ? (
             <div className="mobile-login-logout-container">
               {Object.keys(state.loggedData).length ? (
                 <div className="btn-holder">
@@ -214,11 +185,6 @@ export const Heading = ({ loaded }) => {
           ) : null}
         </div>
       </div>
-      {/* <div className="head-flex nav-bar">
-        <div className="items">Politics</div>
-        <div className="items">Entertainment</div>
-        <div className="items">Sports</div>
-      </div> */}
     </header>
   );
 };

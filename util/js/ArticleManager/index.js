@@ -1,0 +1,16 @@
+import searchArticle from "./searchArticle";
+import updateArticle from "./updateArticle";
+import getArticleByChunk from "./getArticleByChunk";
+import fetchArticleSections from "./getSections";
+import addArticle from "./addArticle";
+import uploadFile from "./uploadImage";
+import deletedata from "./deleteArticle";
+import getUserDetails from "./getUserDetails";
+export const search = searchArticle;
+export const update = updateArticle;
+export const get = getArticleByChunk;
+export const getSections = fetchArticleSections;
+export const add = addArticle;
+export const uploadImage = uploadFile;
+export const remove = deletedata;
+export const user = getUserDetails;

@@ -1,11 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Heading } from "../../util/components/heading";
-import { auth } from "../../util/js/firebaseconn";
+import { Heading, BlogBox } from "@tcc/Components";
+import { auth, LoggedData } from "@tcc/ArticleManager/Database/Auth";
 import { useRouter } from "next/router";
-
-import { LoggedInInfo, getArticleByScroll } from "../../util/js/articleDB";
-
-import { BlogBox } from "../../util/components/blogBox";
+import { get } from "@tcc/ArticleManager/Database";
 
 export default function Section({ isOnline, routerloaded }) {
   const [alist, setAlist] = useState([]);
@@ -28,8 +25,7 @@ export default function Section({ isOnline, routerloaded }) {
       localNextkey = 0;
     }
     try {
-      console.log("is First Time?" + localFirstTime);
-      const val = await getArticleByScroll(
+      const val = await get(
         [],
         localFirstTime,
         localNextkey,
@@ -37,6 +33,7 @@ export default function Section({ isOnline, routerloaded }) {
       );
 
       let rvarr = val.articles;
+      console.log(val);
       setNextKey(val.lowestTimestampKey.time);
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
@@ -69,7 +66,7 @@ export default function Section({ isOnline, routerloaded }) {
     }
 
     auth.onAuthStateChanged((user) => {
-      LoggedInInfo(user)
+      LoggedData(user)
         .then((result) => {
           if (result.isAdmin) {
             isAdmin(true);

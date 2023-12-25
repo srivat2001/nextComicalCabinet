@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "thecomicalcabient",
+  "private_key_id": "560c2c497cf91a5a0923894cb27cf165756c8c74",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC2lEUwHyaBjgoe\nJMHQkYj5EjTWeHxDRN//gIgUr8W24OvfdOlW2ywBb1/qebtcclBYPUPqUEo5Msop\nTGdYOskrF/aRqSIGTN06xVzJQeHsfUWdsbDnP1ZOTdDqwy8D3dmEYSwYkGFYK9zx\nDOO1pFSvheFPCd0mRnKdQ4nO9DwU3yFjDZQRpNM6wETptb1QkFclrR+AD7kIvtSq\n3E5P19pT46HBsD4NCdr1chs8JWu0bdzQ3KFb9m0FFkBguTHDa62SpDdyROj3mFmV\nv/rn6L563omc294+v5oa7ymgc6gRVgL8bOR1tTxzwp0gn7LtlE3DiJ3bwxxcBIhs\nOhp9Re+TAgMBAAECggEARAukcZfaeQRf/vYCCeKDoxhG+vuyjDuaJBZaISOVU2Am\naIShBk7u6qYAoFm4G287RHeo3SYJU6H7OEMSbQ6TtOzcZ1MarDBvbxzpRNS6B7J0\nhJ4Z6UVwvARCbYxK9Gz1SWIR1iHRNdQ7Jtd/8k2JhlUmMJfjhQVSaAwoyym5Tqls\nn808piLvBwcKajfhi0hjueC02/9G3NufSBA64DyGEZXFE7wxTjmNng1ews6oxqAG\nrIRLhBCaTElatyhkTIsqoJjGJ3wxJ+mpeSEcshKQetF8pYIzCJ+OjfjQ3nIcq3m1\nn/bTfg/8ZR8DMSrpRZ393PZo2cUrmk9CDFO/BDpGgQKBgQDpYx8rpUBugTbWwUjw\n5So/zXMPE4x+/7KnJC6ixk3JlxOohcSCW4dYvCciHvpvwbv1C3al9as2YQtcKNrR\nJBeamGHjsj+RqGJUyzBIXtksJO9poxGuFxbjS71E3hSi1GVq4s8FDtJrb81AtDWJ\nn1QoqZAx0RoIDQsr+qchQ9Md0wKBgQDIROtKUWBYloziaUH8YRCuT6Nmz9nH4njg\nIHDT//CRJoFRFMARkiQ2UvYMB8g5uG7KvkrjXNwO1bn3l6S8vbqmiFCzBS6JD9rZ\nsf+AMWJNqORd0GbVGOfvG6vdCC+M7iOiyJ/xcOPxkYr5lc2nSwJX8hDtwN+hHdcd\nn98CkuQPQQKBgQCoKFcpJ2QJOui8S3+2sieC2RDx5+/vAWVDsHo5phAeE9CCN/+i\nvTgD421+1Ds1kq1OnffbE+tMvxdkS7t9vTeUl/7QBHpxBJX06oHbYxuvBt3Ji0kN\n2m0PUF8K48iSmd6I6OqohkluR5vn5vA8PKRyt9nBSxwqeNt30J3jBe9zKQKBgHh4\nNM2U3A8OKRt9U8s8nGsuzs1m1MuPqUSxXw24FP9LmVir0coADjZ7ezTLbZ+DGWpu\nQ+A3GMz3thGBMAC1ZNUOhPTbdh3O4sg3ccmsa0TqBs2EMoeXntVP4PdqGCh/jAI9\nCzGSxhungGEYwwgScAt1Ose6UQu7Ro60f9Mth3DBAoGAOuokgRvq37qmtepEwgoA\nwOO/IiRgPPhA13o7x76yjDS3Og56hqbWW7jBkRYI4CQrEHBUUdRFMVWQ1+6xH3yd\npDrQUI5cJdfGEZzc3dTfjm6KKn2Y3gS6bkNCJTyldwZc9eTM4N0EUw9GWCSJ070C\ni+Oa/sfW5B1CqK09LR8uR1Q=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-784hj@thecomicalcabient.iam.gserviceaccount.com",
+  "client_id": "110553825516256644327",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-784hj%40thecomicalcabient.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

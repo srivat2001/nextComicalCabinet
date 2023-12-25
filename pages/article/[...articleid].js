@@ -1,15 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Heading } from "../../util/components/heading";
-import { auth } from "../../util/js/firebaseconn";
-import {
-  searcharticle,
-  Publisharticle1,
-  LoggedInInfo,
-  fetchArticleSections,
-  getImageLink,
-} from "../../util/js/articleDB";
-import { getBlob } from "firebase/storage";
-import { redirect } from "next/navigation";
+import { Heading } from "@tcc/Components";
+import { auth, LoggedData } from "@tcc/ArticleManager/Database/Auth";
+import { search, add, getSections, get } from "@tcc/ArticleManager/Database/";
 import { useRouter } from "next/router";
 const useAutosizeInput = (limit) => {
   const [remainingChars, setRemainingChars] = useState(20);
@@ -40,7 +32,7 @@ const useAutosizeInput = (limit) => {
   };
 };
 async function loadArticles(paramValue, uid) {
-  return await searcharticle(paramValue, uid);
+  return await search(paramValue, uid);
 }
 function PublishArticle({ isOnline, routerloaded, articleData }) {
   const router = useRouter();
@@ -63,8 +55,10 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
 
   const ImageRef = useRef(null);
   const TrggerChange = (ReFTextarea, value) => {
-    ReFTextarea.current.value = value;
-    ReFTextarea.current.dispatchEvent(new Event("input", { bubbles: true }));
+    if (ReFTextarea.current) {
+      ReFTextarea.current.value = value;
+      ReFTextarea.current.dispatchEvent(new Event("input", { bubbles: true }));
+    }
   };
 
   const BlogTOLocalUrl = (blob) => {
@@ -96,7 +90,7 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
   };
   const fetchSection = async () => {
     try {
-      const sectionsArray = await fetchArticleSections();
+      const sectionsArray = await getSections();
       setSectionList(sectionsArray);
       setSection(sectionsArray[0]);
     } catch (error) {
@@ -118,7 +112,7 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
     }
     fetchSection();
     auth.onAuthStateChanged(async (user) => {
-      LoggedInInfo(user)
+      LoggedData(user)
         .then((result) => {
           setuser(user);
           if (result.isAdmin && router.query.articleid) {
@@ -159,7 +153,8 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
                 {type === "edit" ? "Edit" : "Add"} Article
               </div>
 
-              {load && admin ? (
+              {(load && admin && type === "edit" && found) ||
+              (load && admin && type === "add") ? (
                 <div>
                   <div>Title</div>
                   <div className="grow-wrap">
@@ -224,39 +219,19 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
                   <button
                     disabled={!admin}
                     onClick={async (e) => {
-                      // const formData = new FormData();
-                      // formData.append("title", titleInput.value);
-                      // formData.append("desc", Para.value);
-                      // formData.append("imglink", Imglink.value);
-                      // formData.append("articleID", articleID); // Assuming articleID is a variable
-                      // formData.append("section", section); // Assuming section is a variable
-                      // formData.append(
-                      //   "oldDetailsJSON",
-                      //   JSON.stringify(oldDetails)
-                      // ); // Assuming oldDetails is an object
-                      // formData.append("userJSON", JSON.stringify(user)); // Assuming user is an object
-                      // formData.append("file", file);
-                      // const result1 = await fetch("/api/article/add", {
-                      //   method: "POST",
-                      //   body: formData,
-                      // });
-                      // console.log(await result1.json());
-                      //  const data = await result.json();
-                      const result = await Publisharticle1(
+                      SetWarning("Adding or Updating....");
+                      const result = await add(
                         titleInput.value,
                         Para.value,
-                        Imglink.value,
-                        articleID,
                         section,
                         oldDetails,
-                        user,
                         file
                       );
 
                       SetWarning(result.message);
                       if (result.type == "update" && result.status == 200) {
                         setOldDetails(result.data.updateddata);
-                        router.push("/article/" + result.data.updatedtitle);
+                        //    router.push("/article/" + result.data.updatedtitle);
                       }
                       if (result.type == "add" && result.status == 200) {
                         router.push("/article/" + result.data.title);
@@ -270,6 +245,11 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
                 <div>
                   <div>
                     {load && admin == 0 ? <div>You are not admin</div> : null}
+                  </div>
+                  <div>
+                    {load && admin == 1 && found == 0 ? (
+                      <div>Article Not found</div>
+                    ) : null}
                   </div>
                   <div>{load == 0 ? <div>Loading </div> : null}</div>
                 </div>
