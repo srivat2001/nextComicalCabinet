@@ -5,16 +5,16 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCc_2anrk45UUAKf8QsiMy-Q2AowCnW6ak",
-  authDomain: "thecomicalcabient.firebaseapp.com",
-  databaseURL:
-    "https://thecomicalcabient-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "thecomicalcabient",
-  storageBucket: "thecomicalcabient.appspot.com",
-  messagingSenderId: "824898717376",
-  appId: "1:824898717376:web:e8d04d9c4ff72bd981cf25",
-  measurementId: "G-L8BHLXXSS5",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
+
 let app, db, analytics, auth, storage;
 
 if (typeof window !== "undefined") {
@@ -27,6 +27,7 @@ if (typeof window !== "undefined") {
   app = initializeApp(firebaseConfig);
   db = getDatabase(app);
   auth = getAuth(app);
+  storage = getStorage(app);
 }
 
 export { app, db, analytics, firebaseConfig, auth, storage };

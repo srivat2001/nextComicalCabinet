@@ -29,6 +29,7 @@ const addArticle = async (title, desc, section, oldDetails, file) => {
         uid: user.uid,
         section: section,
       };
+
       const newSlugifiedtitle = slugify(title, { lower: false });
 
       const currentDate = new Date();
@@ -74,14 +75,14 @@ const addArticle = async (title, desc, section, oldDetails, file) => {
       userDetails.displayName = user.displayName;
       userDetails.email = user.email;
       userDetails.uid = user.uid;
-
-      searchIndexUpdates[`/userdetails/${oldDetails.uid}/`] = userDetails;
+      searchIndexUpdates[`/userdetails/${userDetails.uid}/`] = userDetails;
       searchIndexUpdates[`/articles/${user.uid}/${Inputdata.blogid}`] =
         Inputdata;
       searchIndexUpdates[
         `/artcleSectionsGroup/${Inputdata.section}/${Inputdata.blogid}`
       ] = articleMetaData;
       searchIndexUpdates[`/searchIndex/${newSlugifiedtitle}`] = articleMetaData;
+      console.log(searchIndexUpdates);
       await update(ref(db), searchIndexUpdates);
       return resolve(
         new Response("Added Successfully", 200, "add", {

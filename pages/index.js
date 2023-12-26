@@ -6,6 +6,7 @@ import { LoggedData } from "@tcc/ArticleManager/Database/Auth";
 import timeAndDateConverter from "@tcc/ArticleManager/timeAndDateConverter";
 import { getSections } from "@tcc/ArticleManager/Database";
 import Link from "next/link";
+import slugify from "slugify";
 const BlogBoxLazy = lazy(() => import("../util/components/blogBox"));
 function Main({ isOnline, routerloaded }) {
   const [alist, setAlist] = useState([]); //ArticleList
@@ -118,6 +119,7 @@ function Main({ isOnline, routerloaded }) {
         auth.onAuthStateChanged((user) => {
           LoggedData(user)
             .then((result) => {
+              console.log(result);
               if (result.isAdmin) {
                 isAdmin(true);
               } else {
@@ -135,7 +137,12 @@ function Main({ isOnline, routerloaded }) {
       }
     });
   }, []);
-
+  const handleImageLoad = (e) => {
+    e.target.parentNode.className = e.target.parentNode.className.replace(
+      new RegExp("loadingScreenBar", "g"),
+      ""
+    );
+  };
   return (
     <div>
       <div
@@ -148,14 +155,24 @@ function Main({ isOnline, routerloaded }) {
               <div className="banner-container">
                 <div className="Banner">
                   <div className="left">
-                    <div className="figure-wrapper">
-                      <img src={alist[1].imglink}></img>
+                    <div className="figure-wrapper loadingScreenBar">
+                      <img
+                        src={alist[0].imglink}
+                        className="loadingScreenBar"
+                        onLoad={handleImageLoad}
+                      ></img>
                     </div>
                   </div>
 
                   <div className="right">
                     <div className="Section">{alist[0].section}</div>
-                    <div className="title">{alist[0].title}</div>
+                    <Link
+                      href={`/article/${slugify(alist[0].title, {
+                        lower: false,
+                      })}`}
+                    >
+                      <div className="title">{alist[0].title}</div>
+                    </Link>
                     <div className="desc">
                       {alist[0].desc.split(" ").length > 15
                         ? alist[0].desc.split(" ").slice(0, 14).join(" ") +
@@ -206,7 +223,9 @@ function Main({ isOnline, routerloaded }) {
               {/* Loop through sections and render blogs */}
               {Object.keys(blogsBySection).map((section) => (
                 <div>
-                  <h2 className="link">{section}</h2>
+                  <Link href={`/section/` + section}>
+                    <h2 className="link">{section}</h2>
+                  </Link>
                   <div
                     key={section}
                     className={

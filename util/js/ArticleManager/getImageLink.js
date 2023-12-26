@@ -4,10 +4,9 @@ import {
   getDownloadURL,
   getBlob,
 } from "firebase/storage";
-
+import { storage } from "./Auth/firebaseconn";
 const getImageLink = (uid, blogid, GetBlob = false) => {
   return new Promise(async (resolve, reject) => {
-    const storage = getStorage();
     getDownloadURL(ref1(storage, `images/imgid${uid}${blogid}`))
       .then(async (url) => {
         const response = {};

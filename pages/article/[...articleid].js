@@ -67,7 +67,6 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
 
   useEffect(() => {
     if (load == 1) {
-      TrggerChange(TitleRef, "");
     }
     if (load == 1 && admin == 1 && Object.keys(oldDetails).length > 0) {
       TrggerChange(TitleRef, oldDetails.title);
@@ -234,7 +233,7 @@ function PublishArticle({ isOnline, routerloaded, articleData }) {
                         //    router.push("/article/" + result.data.updatedtitle);
                       }
                       if (result.type == "add" && result.status == 200) {
-                        router.push("/article/" + result.data.title);
+                        // router.push("/article/" + result.data.title);
                       }
                     }}
                   >

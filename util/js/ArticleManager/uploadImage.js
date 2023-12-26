@@ -6,9 +6,9 @@ import {
   deleteObject,
 } from "firebase/storage";
 import getImageLink from "./getImageLink";
+import { storage } from "./Auth/firebaseconn";
 const uploadFile = (uid, blogid, file) => {
   return new Promise(async (resolve, reject) => {
-    const storage = getStorage();
     const imgRef = `images/imgid${uid}${blogid}`;
     const storageRef = ref1(storage, imgRef);
 

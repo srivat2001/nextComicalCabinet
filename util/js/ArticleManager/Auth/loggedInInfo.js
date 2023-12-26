@@ -21,6 +21,7 @@ const LoggedInInfo = async (user) => {
       reject(error);
     };
     if (user) {
+      console.log(user);
       const query = ref(db, "/admins/" + user.uid);
       onValue(query, handleQueryResult, handleError);
     } else {

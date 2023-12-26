@@ -7,8 +7,17 @@ import { Heading, Disclaimer, NoIntenet } from "@tcc/Components";
 import { LoggedData, auth } from "@tcc/ArticleManager/Database/Auth";
 import { search } from "@tcc/ArticleManager/Database";
 import Head from "next/head";
-
-function portfolioProject({ isOnline, routerloaded, articleData }) {
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import "@fortawesome/fontawesome-svg-core/styles.css"; // Import the styles
+import "@scripts/font-awsome";
+import {
+  faFacebook,
+  faTwitter,
+  faInstagram,
+  faWhatsapp,
+} from "@fortawesome/free-brands-svg-icons";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
+function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
   const router = useRouter();
   const [load, loaded] = useState(false);
   const [admin, isAdmin] = useState(false);
@@ -18,7 +27,32 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
       router.push("404");
     }
   }
-
+  const copyUrlToClipboard = (e) => {
+    const url = window.location.href;
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {})
+        .catch((error) => {
+          console.error("Unable to copy to clipboard", error);
+        });
+    } else {
+      // Fallback for browsers that do not support navigator.clipboard
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      alert("URL copied to clipboard!");
+    }
+  };
+  const handleImageLoad = (e) => {
+    e.target.parentNode.className = e.target.parentNode.className.replace(
+      new RegExp("loadingScreenBar", "g"),
+      ""
+    );
+  };
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       LoggedData(user)
@@ -94,7 +128,40 @@ function portfolioProject({ isOnline, routerloaded, articleData }) {
                     </Link>
                   ) : null}
                 </div>
-                <img src={articleData.imglink} />
+
+                <div className="blog_img_cover loadingScreenBar">
+                  <img src={articleData.imglink} onLoad={handleImageLoad} />
+                </div>
+                <div className="font-social">
+                  <a
+                    href={
+                      "https://www.facebook.com/sharer.php?u=" +
+                      window.location.href
+                    }
+                    target="_blank"
+                  >
+                    <FontAwesomeIcon icon={["fab", "facebook"]} size="2x" />
+                  </a>
+
+                  <a
+                    href={
+                      "https://twitter.com/intent/tweet?url=" +
+                      window.location.href
+                    }
+                    target="_blank"
+                  >
+                    <FontAwesomeIcon icon={["fab", "twitter"]} size="2x" />
+                  </a>
+                  <a
+                    href={"https://wa.me/?text=" + window.location.href}
+                    target="_blank"
+                  >
+                    <FontAwesomeIcon icon={faWhatsapp} size="2x" />
+                  </a>
+                  <a href="#" onClick={copyUrlToClipboard}>
+                    <FontAwesomeIcon icon={faCopy} size="2x" />
+                  </a>
+                </div>
                 <h1 className="authorname">By {articleData.displayName}</h1>
                 <div className="article-para">
                   {articleData.desc
@@ -132,6 +199,7 @@ export async function getServerSideProps(context) {
     return {
       props: {
         articleData: articleSnapshot,
+        searchTerm: searchT,
       },
     };
   } else {

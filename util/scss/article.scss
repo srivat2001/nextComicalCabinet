@@ -1,7 +1,8 @@
 @import "responsive";
 
 .article-page {
-  background-color: white;
+  background-color: $bg-color-inverted-articlepage;
+  color: $font-color-inverted-articlepage;
   padding: 1rem;
   .article-cotainer {
     .articletop {
@@ -22,6 +23,11 @@
     @include respond-to("small") {
       border-radius: 5px;
     }
+  }
+  .blog_img_cover {
+    position: relative;
+    min-height: 200px;
+    transition: 1s;
   }
   img {
     width: 90%;
@@ -44,6 +50,27 @@
       margin-left: 1rem;
       border: 1px solid white;
       margin-left: 0;
+    }
+  }
+  .font-social {
+    display: flex;
+    display: grid;
+    justify-items: center;
+    grid-template-columns: repeat(4, 0fr);
+    gap: 20px;
+    margin: 10px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: 75px;
+    margin-top: 30px;
+    @include respond-to("small") {
+      margin-right: 10px;
+      gap: 15px;
+    }
+    a {
+      color: black;
+
+      font-size: 15px;
     }
   }
   .heading-main {
@@ -90,8 +117,8 @@
     margin: 57px 0px 9px 6px;
 
     font-size: 19px;
-    color: #cf0000;
-    border-bottom: 3px solid #c60000;
+    color: $font-color-section-name;
+    border-bottom: 3px solid $font-color-section-name-bottom-border;
     padding-bottom: 5px;
     width: fit-content;
     @include respond-to("small") {

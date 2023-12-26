@@ -35,3 +35,31 @@
     }
   }
 }
+$body-bg-color: black;
+$bg-color: white;
+$bg-color-hover: white;
+$bg-color-inverted: black; //banner bg color
+$bg-color-inverted-articlepage: white; //article page bg color
+$loading-screen-background: linear-gradient(
+  90deg,
+  #272727 25%,
+  #383838 50%,
+  rgb(12, 12, 12) 75%
+);
+
+$font-color: #4a4a4a;
+
+$font-color-section-name: #cf0000;
+$font-color-section-name-bottom-border: #cf0000;
+$font-color-inverted: white;
+$font-color-inverted-articlepage: black;
+$font-color-hover: black;
+$border-color: rgb(202, 202, 202);
+$font-color-light: #4a4a4a;
+$loader-spinner-border: rgb(96, 96, 96);
+$font-size: 16px;
+// $bg-color: black;
+// $font-color: white;
+// $font-color-light: #4a4a4a;
+// $loader-spinner-border: white;
+// $font-size: 16px;

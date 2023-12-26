@@ -14,14 +14,24 @@ const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
       console.error("Deletion failed:", error);
     }
   };
-
+  const handleImageLoad = (e) => {
+    e.target.parentNode.className = e.target.parentNode.className.replace(
+      new RegExp("loadingScreenBar", "g"),
+      ""
+    );
+  };
   const router = useRouter();
   return (
     <div className={loaded ? "box loadingScreenBar boxloading" : "box"}>
       {data && Object.keys(data).length ? (
         <div className="img-bloginfo-container">
-          <div className="blog_img_cover">
-            <img className="blog_img" src={data.imglink} alt="blog_img" />
+          <div className="blog_img_cover loadingScreenBar">
+            <img
+              className="blog_img"
+              onLoad={handleImageLoad}
+              src={data.imglink}
+              alt="blog_img"
+            />
           </div>
           <div className="right-side">
             <div className="title">
