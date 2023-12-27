@@ -38,7 +38,6 @@ const getArticleByChunk = async (prevArr, first, lastTime, reftype) => {
         )[0];
         lastTime = latestSearchIndexItem.time;
       }
-      console.log(lastTime);
       if (lastTime !== 0) {
         let searchIndexRef = "";
         if (first === true) {
@@ -62,7 +61,6 @@ const getArticleByChunk = async (prevArr, first, lastTime, reftype) => {
         if (searchIndexSnapshot.exists()) {
           const searchIndexData = searchIndexSnapshot.val();
           const lastKeys = Object.keys(searchIndexData);
-          console.log(searchIndexData, lastKeys);
           for (const key of lastKeys) {
             const articleRef = ref(
               db,

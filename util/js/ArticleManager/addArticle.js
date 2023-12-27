@@ -9,10 +9,10 @@ import checkIfArticleExists from "./checkIfArticleExists";
 import { uploadImage } from "@tcc/ArticleManager/Database/";
 const addArticle = async (title, desc, section, oldDetails, file) => {
   return new Promise(async (resolve, reject) => {
-    // const validationProblems = validateInputs(title, imglink, desc, section);
-    // if (validationProblems.length !== 0) {
-    //   resolve(new Response(validationProblems.join(" "), 401, "add"));
-    // }
+    const validationProblems = validateInputs(title, imglink, desc, section);
+    if (validationProblems.length !== 0) {
+      resolve(new Response(validationProblems.join(" "), 401, "add"));
+    }
     try {
       const user = auth.currentUser;
 

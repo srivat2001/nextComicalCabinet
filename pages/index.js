@@ -1,12 +1,17 @@
-import { BlogBox, Heading, Disclaimer } from "@tcc/Components";
+import {
+  BlogBox,
+  Heading,
+  Disclaimer,
+  Banner,
+  MetaData,
+} from "@tcc/Components";
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import { auth } from "@tcc/ArticleManager/Database/Auth";
 import { get } from "@tcc/ArticleManager/Database";
 import { LoggedData } from "@tcc/ArticleManager/Database/Auth";
-import timeAndDateConverter from "@tcc/ArticleManager/timeAndDateConverter";
 import { getSections } from "@tcc/ArticleManager/Database";
 import Link from "next/link";
-import slugify from "slugify";
+import { ErrorBoundary } from "@tcc/Components";
 const BlogBoxLazy = lazy(() => import("../util/components/blogBox"));
 function Main({ isOnline, routerloaded }) {
   const [alist, setAlist] = useState([]); //ArticleList
@@ -55,7 +60,6 @@ function Main({ isOnline, routerloaded }) {
 
       for (const secitonInd of SectionArr) {
         const indvArticle = await GetArticleOnSection(secitonInd);
-        console.log(indvArticle);
 
         setBlogsBySection((prevBlogs) => ({
           ...prevBlogs,
@@ -70,7 +74,6 @@ function Main({ isOnline, routerloaded }) {
     fetchSection().then((SectionArr) => {
       SectionArr.forEach((secitonInd) => {
         GetArticleOnSection(secitonInd).then((indvArticle) => {
-          console.log(indvArticle);
           setBlogsBySection((prevBlogs) => ({
             ...prevBlogs,
             [secitonInd]: indvArticle.articles,
@@ -79,9 +82,7 @@ function Main({ isOnline, routerloaded }) {
       });
     });
   }, []);
-  useEffect(() => {
-    console.log(blogsBySection);
-  }, [blogsBySection]);
+
   const deletedAlert = (uid, key) => {
     alert("Deleted");
     const updatedItems = alist.filter((item) => item.blog_id !== key);
@@ -119,7 +120,6 @@ function Main({ isOnline, routerloaded }) {
         auth.onAuthStateChanged((user) => {
           LoggedData(user)
             .then((result) => {
-              console.log(result);
               if (result.isAdmin) {
                 isAdmin(true);
               } else {
@@ -149,46 +149,14 @@ function Main({ isOnline, routerloaded }) {
         className={!routerloaded || !loaded ? "App  mainloadingScreen" : "App"}
       >
         <Heading loaded={loaded} />
+
+        <MetaData pageTitle={"The Comical Cabinet"} />
         <div className="blog-display-container">
           <div className="blog-holder-btn-container">
-            {alist.length > 0 ? (
-              <div className="banner-container">
-                <div className="Banner">
-                  <div className="left">
-                    <div className="figure-wrapper loadingScreenBar">
-                      <img
-                        src={alist[0].imglink}
-                        className="loadingScreenBar"
-                        onLoad={handleImageLoad}
-                      ></img>
-                    </div>
-                  </div>
+            <ErrorBoundary fallback={<p>Something went wrong</p>}>
+              <Banner alist={alist} />
+            </ErrorBoundary>
 
-                  <div className="right">
-                    <div className="Section">{alist[0].section}</div>
-                    <Link
-                      href={`/article/${slugify(alist[0].title, {
-                        lower: false,
-                      })}`}
-                    >
-                      <div className="title">{alist[0].title}</div>
-                    </Link>
-                    <div className="desc">
-                      {alist[0].desc.split(" ").length > 15
-                        ? alist[0].desc.split(" ").slice(0, 14).join(" ") +
-                          "..."
-                        : alist[0].desc}
-                    </div>
-
-                    <div className="timedate">
-                      {timeAndDateConverter(alist[0].date, alist[0].time)}
-                    </div>
-                    <div></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
             <h2>Latest Article</h2>
             <div
               className={

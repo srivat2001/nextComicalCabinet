@@ -1,10 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Heading, BlogBox } from "@tcc/Components";
+import { Heading, BlogBox, MetaData } from "@tcc/Components";
 import { auth, LoggedData } from "@tcc/ArticleManager/Database/Auth";
 import { useRouter } from "next/router";
 import { get } from "@tcc/ArticleManager/Database";
-
-export default function Section({ isOnline, routerloaded }) {
+import { image } from "../../util/img/entertainemnt.png";
+import Head from "next/head";
+export default function Section({ isOnline, routerloaded, typeSection }) {
   const [alist, setAlist] = useState([]);
   const router = useRouter();
   const [actionMessage, setActionMessage] = useState("Loading");
@@ -33,7 +34,6 @@ export default function Section({ isOnline, routerloaded }) {
       );
 
       let rvarr = val.articles;
-      console.log(val);
       setNextKey(val.lowestTimestampKey.time);
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
@@ -89,6 +89,7 @@ export default function Section({ isOnline, routerloaded }) {
 
   return (
     <div>
+      <MetaData pageTitle={typeSection + " Page"} />
       <div
         className={!loaded || !routerloaded ? "App  mainloadingScreen" : "App"}
       >
@@ -127,4 +128,12 @@ export default function Section({ isOnline, routerloaded }) {
       </div>
     </div>
   );
+}
+export async function getServerSideProps(context) {
+  const searchT = context.params?.type;
+  return {
+    props: {
+      typeSection: searchT,
+    },
+  };
 }

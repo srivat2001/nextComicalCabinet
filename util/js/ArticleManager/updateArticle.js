@@ -3,9 +3,9 @@ import { db } from "@tcc/ArticleManager/Database/Auth";
 import createTimeStamp from "./Assests/createTimeStamp";
 import checkIfArticleExists from "./checkIfArticleExists";
 import Response from "@scripts/response";
-import uploadAndCompressImage from "./Assests/compressImage";
 import { uploadImage } from "@tcc/ArticleManager/Database/";
 import compressImage from "./Assests/compressImage";
+import slugify from "slugify";
 const updateArticle = async (
   oldDetails,
   updatedData,
@@ -17,7 +17,6 @@ const updateArticle = async (
   return new Promise(async (resolve, reject) => {
     try {
       const updates = {};
-      console.log(newfile);
       if (newfile !== undefined) {
         let toBeUploaded = newfile;
         if (newfile) {
@@ -36,8 +35,6 @@ const updateArticle = async (
         oldDetails.time
       );
       articleMetaData.time = timestampinseconds;
-
-      console.log(user);
       Object.keys(oldDetails).forEach((param) => {
         if (
           oldDetails.hasOwnProperty(param) &&
