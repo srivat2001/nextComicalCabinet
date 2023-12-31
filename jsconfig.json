@@ -1,20 +1,27 @@
-// jsconfig.json or tsconfig.json
-
-// jsconfig.json
 {
   "compilerOptions": {
+    "jsx": "react",
     "baseUrl": "./",
     "paths": {
       "@scripts/*": ["./util/js/*"],
       "@tcc/ArticleManager/Database/Auth*": [
         "./util/js/ArticleManager/Auth/index.js"
       ],
+      "@tcc/ArticleManager/Interface/*": ["./util/data/*"],
       "@tcc/Components*": ["./util/components/index.js"],
       "@tcc/Components/*": ["./util/components/*"],
-      "@tcc/ArticleManager/Database*": ["./util/js/ArticleManager/index.js"],
+      "@tcc/ArticleManager/Database*": ["util/js/ArticleManager/index.ts"],
       "@tcc/ArticleManager/*": ["./util/js/ArticleManager/*"],
-
       "@error/*": ["./util/errors/*"]
     }
-  }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts", // Include Next.js types
+    "app/lib/placeholder-data.js",
+    "scripts/seed.js"
+  ],
+  "exclude": ["node_modules"]
 }

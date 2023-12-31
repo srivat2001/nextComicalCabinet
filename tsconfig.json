@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"],
+      "@scripts/*": ["./util/js/*"],
+      "@tcc/ArticleManager/Database/Auth*": [
+        "./util/js/ArticleManager/Auth/index.js"
+      ],
+      "@tcc/ArticleManager/Interface/*": ["./util/js/data/*"],
+      "@tcc/Components*": ["./util/components/index.js"],
+      "@tcc/Components/*": ["./util/components/*"],
+      "@tcc/ArticleManager/Database*": ["./util/js/ArticleManager/index.ts"],
+      "@tcc/ArticleManager/*": ["./util/js/ArticleManager/*"],
+      "@error/*": ["./util/errors/*"]
+    },
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/lib/placeholder-data.js",
+    "scripts/seed.js"
+  ],
+  "exclude": ["node_modules"]
+}

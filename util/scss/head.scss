@@ -5,8 +5,9 @@ header {
     background-color: $bg-color;
     color: $font-color;
     padding: 1rem 0px 0px 0px;
+
     .head-logo {
-      margin-left: 100px;
+      margin-left: 21px;
     }
     @include respond-to("header-mobile") {
       display: block;
@@ -88,6 +89,9 @@ header {
           &:first-child button {
             border-radius: 20px;
             padding: 5px 10px;
+          }
+          .signout_text {
+            margin-left: 5px;
           }
         }
       }

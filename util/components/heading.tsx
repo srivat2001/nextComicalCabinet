@@ -14,14 +14,15 @@ import img_logo from "../img/TCB_Banner2.png";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpload, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import Response from "@scripts/response";
 
-export const Heading = ({ loaded }) => {
+export const Heading = ({ loaded }: { loaded: boolean }) => {
   const initialState = {
     alist: [],
     userName: "",
     loggedData: {},
   };
-  const reducer = (state, action) => {
+  const reducer = (state: any, action: any) => {
     switch (action.type) {
       case "SET_LOGGED_DATA":
         return { ...state, loggedData: action.payload.user };
@@ -32,15 +33,17 @@ export const Heading = ({ loaded }) => {
     }
   };
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [load, setLoad] = useState(true);
-  const [sections, setSectionList] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState<Boolean>(false);
+  const [load, setLoad] = useState<Boolean>(true);
+  const [sections, setSectionList] = useState<string[]>([]);
+
   const fetchSection = async () => {
     try {
       const sectionsArray = await getSections();
-      setSectionList(sectionsArray);
+      setSectionList(sectionsArray.data!.SectionList);
     } catch (error) {
-      console.error("Error fetching article sections:", error);
+      if (error instanceof Response) {
+      }
     }
   };
   const toggleSidebar = () => {
@@ -59,7 +62,7 @@ export const Heading = ({ loaded }) => {
           dispatch({ type: "SET_LOGGED_DATA", payload: result });
         })
         .catch((error) => {
-          console.log(error);
+          console.log(error.message.message);
         });
     }
   }
@@ -88,8 +91,10 @@ export const Heading = ({ loaded }) => {
       .catch((error) => {
         setLoad(false);
       });
-    if (localStorage.getItem("_loggeddata") != null) {
-      const parsedData = JSON.parse(localStorage.getItem("_loggeddata"));
+    if (localStorage.getItem("_loggeddata") !== null) {
+      const parsedData = JSON.parse(
+        localStorage.getItem("_loggeddata") as string
+      );
       dispatch({ type: "SET_LOGGED_DATA", payload: parsedData });
     }
   }, []);
@@ -114,12 +119,12 @@ export const Heading = ({ loaded }) => {
                 <a onClick={signOutbtn}>
                   <button className="upload-btn ">
                     <FontAwesomeIcon icon={faSignOutAlt} />
-                    <span>Sign out</span>
+                    <span className="signout_text">Sign out</span>
                   </button>
                 </a>
                 <Link href="/article/add/new">
                   <button className="upload-btn ">
-                    <FontAwesomeIcon icon={faUpload} />
+                    <FontAwesomeIcon size="xs" icon={faUpload} />
                   </button>
                 </Link>
               </div>
@@ -154,9 +159,10 @@ export const Heading = ({ loaded }) => {
                 ))}
               </ul>
             ) : null}
+            {sections.length == 0 ? <div>An Error Occured</div> : null}
           </div>
           <div className="loader-container">
-            {!load ? <div class="loader"></div> : null}
+            {!load ? <div className="loader"></div> : null}
           </div>
           {load ? (
             <div className="mobile-login-logout-container">

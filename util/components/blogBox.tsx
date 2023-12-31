@@ -2,10 +2,15 @@ import Link from "next/link";
 import slugify from "slugify";
 import { useRouter } from "next/router";
 import { remove } from "@tcc/ArticleManager/Database";
-
-const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
-  // console.log(data);
-  const deleteArticleAsync = async (key, uid, title, section) => {
+interface BlogBoxProps {
+  data:any 
+  delete1?:any
+  admin?:any 
+  deleteAlert?:any  
+  loaded?:any  
+}
+const BlogBox: React.FC<BlogBoxProps> = ({ data, delete1, admin, deleteAlert, loaded }) => {  // console.log(data);
+  const deleteArticleAsync = async (key:string, uid:string, title:string, section:string) => {
     try {
       await remove(key, uid, title, section);
       console.log("Deletion successful");
@@ -14,12 +19,17 @@ const BlogBox = ({ data, delete1, admin, deleteAlert, loaded }) => {
       console.error("Deletion failed:", error);
     }
   };
-  const handleImageLoad = (e) => {
-    e.target.parentNode.className = e.target.parentNode.className.replace(
-      new RegExp("loadingScreenBar", "g"),
-      ""
-    );
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    if (target.parentNode) {
+      const parentNode = target.parentNode as HTMLElement;
+      parentNode.className = parentNode.className.replace(
+        new RegExp("loadingScreenBar", "g"),
+        ""
+      );
+    }
   };
+  
   const router = useRouter();
   return (
     <div className={loaded ? "box loadingScreenBar boxloading" : "box"}>

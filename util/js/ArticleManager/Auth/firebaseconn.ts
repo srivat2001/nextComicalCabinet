@@ -1,8 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { Database, getDatabase } from "firebase/database";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { Auth } from "firebase-admin/lib/auth/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,7 +16,7 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-let app, db, analytics, auth, storage;
+let app: any, db: Database, analytics, auth: any, storage: any;
 
 if (typeof window !== "undefined") {
   app = initializeApp(firebaseConfig);

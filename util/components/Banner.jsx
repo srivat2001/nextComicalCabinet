@@ -2,6 +2,7 @@ import Link from "next/link";
 import slugify from "slugify";
 import timeAndDateConverter from "@tcc/ArticleManager/timeAndDateConverter";
 const Banner = ({ alist }) => {
+  // throw new Error("Simulated error in component");
   const handleImageLoad = (e) => {
     e.target.parentNode.className = e.target.parentNode.className.replace(
       new RegExp("loadingScreenBar", "g"),

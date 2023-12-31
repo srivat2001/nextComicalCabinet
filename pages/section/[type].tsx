@@ -3,20 +3,32 @@ import { Heading, BlogBox, MetaData } from "@tcc/Components";
 import { auth, LoggedData } from "@tcc/ArticleManager/Database/Auth";
 import { useRouter } from "next/router";
 import { get } from "@tcc/ArticleManager/Database";
-import { image } from "../../util/img/entertainemnt.png";
 import Head from "next/head";
-export default function Section({ isOnline, routerloaded, typeSection }) {
-  const [alist, setAlist] = useState([]);
+import Article from "@/util/js/data/article";
+import { GetServerSidePropsContext } from "next";
+import { User } from "firebase/auth";
+import Response from "@scripts/response";
+
+export default function Section({
+  isOnline,
+  routerloaded,
+  typeSection,
+}: {
+  isOnline: boolean;
+  routerloaded: boolean;
+  typeSection: string;
+}) {
+  const [alist, setAlist] = useState<Article[]>([]);
   const router = useRouter();
-  const [actionMessage, setActionMessage] = useState("Loading");
-  const [admin, isAdmin] = useState(false);
-  const [reload, setReload] = useState(false);
-  const [nextKey, setNextKey] = useState(0);
-  const [FirstTime, setFirstTime] = useState(true);
+  const [actionMessage, setActionMessage] = useState<string>("Loading");
+  const [admin, isAdmin] = useState<boolean>(false);
+  const [reload, setReload] = useState<boolean>(false);
+  const [nextKey, setNextKey] = useState<number>(0);
+  const [FirstTime, setFirstTime] = useState<boolean>(true);
   const EffectRan = useRef(true);
-  const [loaded, setLoded] = useState(false);
-  const [addMore, setAddMore] = useState(false);
-  const [type, setType] = useState("");
+  const [loaded, setLoded] = useState<boolean>(false);
+  const [addMore, setAddMore] = useState<boolean>(false);
+  const [type, setType] = useState<string>("");
 
   const addmore = async (isFirstTime = false) => {
     let localFirstTime = FirstTime;
@@ -25,25 +37,37 @@ export default function Section({ isOnline, routerloaded, typeSection }) {
       localFirstTime = true;
       localNextkey = 0;
     }
+    console.log(localFirstTime);
+    console.log(localNextkey);
     try {
       const val = await get(
-        [],
         localFirstTime,
         localNextkey,
         `artcleSectionsGroup/${router.query.type}`
       );
-
-      let rvarr = val.articles;
-      setNextKey(val.lowestTimestampKey.time);
-      setFirstTime(false);
-      setAlist((alist) => [...alist, ...rvarr]);
-      setAddMore(true);
-      setActionMessage("Loaded Successfully");
-    } catch (error) {
-      console.log(error);
-      if (error.statusCode === 404) {
-        setActionMessage(error.error);
-        setAddMore(false);
+      console.log(val);
+      if (val.status == 404) {
+        if (!localFirstTime) {
+          setAddMore(false);
+        }
+        setActionMessage(val.message);
+      } else {
+        const rvarr: Article[] = val.data!.ArticleList;
+        setNextKey(val.data!.time);
+        setFirstTime(false);
+        setAlist((alist) => [...alist!, ...rvarr]);
+        setAddMore(true);
+        setActionMessage("Loaded Successfully");
+      }
+    } catch (error: any) {
+      if (error instanceof Response) {
+        if (error.status === 404) {
+          setLoded(true);
+          setActionMessage(error.message);
+          setAddMore(false);
+        } else {
+          setActionMessage("Server Error");
+        }
       }
     }
   };
@@ -53,22 +77,21 @@ export default function Section({ isOnline, routerloaded, typeSection }) {
   };
 
   useEffect(() => {
-    if (router.query.type) {
-      console.log(router.query.type);
-    }
     setAlist([]);
     if (!isOnline) {
       setActionMessage("You are offline");
       return () => {};
     }
     if (router.query.type) {
-      setType(router.query.type);
+      if (typeof router.query.type === "string") {
+        setType(router.query.type);
+      }
     }
 
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user: User) => {
       LoggedData(user)
         .then((result) => {
-          if (result.isAdmin) {
+          if (result.data?.isAdmin) {
             isAdmin(true);
           } else {
             isAdmin(false);
@@ -108,16 +131,16 @@ export default function Section({ isOnline, routerloaded, typeSection }) {
                 <div className="not-found">{actionMessage}</div>
               )}
             </div>
-            {addMore ? (
+            {addMore && alist.length > 0 ? (
               <div>
-                {" "}
                 <button
                   onClick={() => {
                     addmore();
                   }}
                 >
                   Load more
-                </button>{" "}
+                </button>
+                s
               </div>
             ) : null}
             {!addMore && alist.length > 0 ? (
@@ -129,7 +152,7 @@ export default function Section({ isOnline, routerloaded, typeSection }) {
     </div>
   );
 }
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const searchT = context.params?.type;
   return {
     props: {

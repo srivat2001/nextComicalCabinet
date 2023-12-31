@@ -6,23 +6,22 @@ import {
   deleteObject,
 } from "firebase/storage";
 import getImageLink from "./getImageLink";
-import { storage } from "./Auth/firebaseconn";
-
-const uploadFile = (uid, blogid, file) => {
+const uploadFile = (uid: string, blogid: string, file: Blob) => {
   return new Promise(async (resolve, reject) => {
-    const imgRef = `images/imgid${uid}${blogid}`;
-    const storageRef = ref1(storage, imgRef);
+    const storage = getStorage();
+    const randomId = Math.random().toString(36).substring(7);
+    const storageRef = ref1(storage, `images/imgid${uid}${blogid}`);
 
     const metadata = {
       contentType: file.type,
       customMetadata: {
-        id: imgRef,
+        id: randomId,
       },
     };
     try {
       // Validate if a file is provided
       if (!file) {
-        throw new Error("No file provided.");
+        return reject(new Error("No file provided."));
       }
 
       //  Check if the file already exists (getMetadata will reject if not found)
@@ -30,7 +29,6 @@ const uploadFile = (uid, blogid, file) => {
       await deleteObject(storageRef);
       await uploadBytes(storageRef, file, metadata);
       const data = await getImageLink(uid, blogid, false);
-
       resolve({ url: data.url });
     } catch (error) {
       await uploadBytes(storageRef, file, metadata);

@@ -17,7 +17,21 @@ import {
   faWhatsapp,
 } from "@fortawesome/free-brands-svg-icons";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
-function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
+import Article from "@/util/js/data/article";
+import { User } from "firebase/auth";
+import { GetServerSideProps } from "next";
+import { GetServerSidePropsContext } from "next";
+function portfolioProject({
+  isOnline,
+  routerloaded,
+  articleData,
+  searchTerm,
+}: {
+  isOnline: boolean;
+  routerloaded: boolean;
+  articleData: Article;
+  searchTerm: string;
+}) {
   const router = useRouter();
   const [load, loaded] = useState(false);
   const [admin, isAdmin] = useState(false);
@@ -27,7 +41,10 @@ function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
       router.push("404");
     }
   }
-  const copyUrlToClipboard = (e) => {
+  const copyUrlToClipboard: React.MouseEventHandler<HTMLAnchorElement> = (
+    e
+  ) => {
+    e.preventDefault(); // Prevent the default behavior of the anchor element
     const url = window.location.href;
     if (navigator.clipboard) {
       navigator.clipboard
@@ -47,17 +64,27 @@ function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
       alert("URL copied to clipboard!");
     }
   };
-  const handleImageLoad = (e) => {
-    e.target.parentNode.className = e.target.parentNode.className.replace(
-      new RegExp("loadingScreenBar", "g"),
-      ""
-    );
+
+  <a href="#" onClick={copyUrlToClipboard}>
+    Copy URL
+  </a>;
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    if (target.parentNode) {
+      const parentNode = target.parentNode as HTMLElement;
+      parentNode.className = parentNode.className.replace(
+        new RegExp("loadingScreenBar", "g"),
+        ""
+      );
+    }
   };
+
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
+    auth.onAuthStateChanged((user: User) => {
       LoggedData(user)
         .then((result) => {
-          if (result.isAdmin) {
+          if (result.data?.isAdmin) {
             isAdmin(true);
           } else {
             isAdmin(false);
@@ -70,7 +97,7 @@ function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
           isAdmin(false);
         });
     });
-  }, [router]);
+  }, []);
   return (
     <div className={!load || !routerloaded ? "App  mainloadingScreen" : "App"}>
       <Heading loaded={load} />
@@ -79,7 +106,7 @@ function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
         <title>{articleData.title}</title>
         <script
           src="https://kit.fontawesome.com/yourcode.js"
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
         ></script>
 
         <meta name="description" content={articleData.desc.split(".")[0]} />
@@ -192,7 +219,7 @@ function portfolioProject({ isOnline, routerloaded, articleData, searchTerm }) {
   );
 }
 export default portfolioProject;
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const searchT = context.params?.searchTerm;
   const articleSnapshot = await search(searchT);
   if (articleSnapshot) {
