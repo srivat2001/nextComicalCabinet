@@ -36,8 +36,15 @@ const Banner = ({ alist }) => {
               </Link>
               <div className="desc">
                 {alist[0].desc.split(" ").length > 15
-                  ? alist[0].desc.split(" ").slice(0, 14).join(" ") + "..."
+                  ? alist[0].desc.split(" ").slice(0, 50).join(" ") + " ..."
                   : alist[0].desc}
+                <Link
+                  href={`/article/${slugify(alist[0].title, {
+                    lower: false,
+                  })}`}
+                >
+                  Read More
+                </Link>
               </div>
 
               <div className="timedate">

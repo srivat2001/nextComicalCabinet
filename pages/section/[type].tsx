@@ -52,7 +52,8 @@ export default function Section({
         }
         setActionMessage(val.message);
       } else {
-        const rvarr: Article[] = val.data!.ArticleList;
+        const rvarr: Article[] = val.data!.ArticleList.reverse();
+        console.log(rvarr);
         setNextKey(val.data!.time);
         setFirstTime(false);
         setAlist((alist) => [...alist!, ...rvarr]);

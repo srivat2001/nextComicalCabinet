@@ -248,6 +248,14 @@ button {
             padding-top: 9px;
             font-size: calc(1vw + 1px);
             line-height: 22px;
+            a {
+              margin-left: 5px;
+              margin-top: 6px;
+              color: white;
+              &:hover {
+                color: #828282;
+              }
+            }
             @include respond-to("medium") {
               display: block;
               font-size: calc(1vw + 10px);

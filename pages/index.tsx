@@ -33,7 +33,7 @@ function Main({ isOnline, routerloaded }: MainProps) {
   const addmore = async () => {
     try {
       const val = await get(FirstTime, nextKey, `searchIndex`);
-      let rvarr = val.data!.ArticleList;
+      let rvarr = val.data!.ArticleList.reverse();
       setNextKey(val.data!.time);
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
@@ -83,7 +83,7 @@ function Main({ isOnline, routerloaded }: MainProps) {
                   | any
               ) => ({
                 ...prevBlogs,
-                [secitonInd]: indarticle.data?.ArticleList,
+                [secitonInd]: indarticle.data?.ArticleList.reverse(),
               })
             );
           }
