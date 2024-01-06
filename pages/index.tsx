@@ -18,6 +18,19 @@ interface MainProps {
   isOnline: boolean;
   routerloaded: boolean;
 }
+function sortByDateDescending(arr: Article[]): Article[] {
+  arr.sort((a, b) => {
+    const dateA = new Date(a.date.split("/").reverse().join("-"));
+    const dateB = new Date(b.date.split("/").reverse().join("-"));
+
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  return arr;
+}
+
+// Example usage:
+
 function Main({ isOnline, routerloaded }: MainProps) {
   const [alist, setAlist] = useState<Article[]>([]); //ArticleList
   const [admin, isAdmin] = useState(false); //Yes if admin
@@ -33,7 +46,9 @@ function Main({ isOnline, routerloaded }: MainProps) {
   const addmore = async () => {
     try {
       const val = await get(FirstTime, nextKey, `searchIndex`);
-      let rvarr = val.data!.ArticleList.reverse();
+      let responsearr = val.data!.ArticleList;
+      const rvarr = sortByDateDescending(responsearr);
+      console.log(rvarr);
       setNextKey(val.data!.time);
       setFirstTime(false);
       setAlist((alist) => [...alist, ...rvarr]);
@@ -74,6 +89,8 @@ function Main({ isOnline, routerloaded }: MainProps) {
             if (indarticle.status == 404) {
               continue;
             }
+            let responsearr = indarticle.data!.ArticleList;
+            const rvarr = sortByDateDescending(responsearr);
             setBlogsBySection(
               (
                 prevBlogs:
@@ -83,7 +100,7 @@ function Main({ isOnline, routerloaded }: MainProps) {
                   | any
               ) => ({
                 ...prevBlogs,
-                [secitonInd]: indarticle.data?.ArticleList.reverse(),
+                [secitonInd]: rvarr,
               })
             );
           }
